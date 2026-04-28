@@ -60,7 +60,7 @@ st.caption("Remote - Australian-based company | Jan 2023 - May 2025")
 st.write("""
 Led delivery of SaaS-based platforms for Australian stakeholders, managing distributed teams and ensuring alignment between business expectations and technical execution.
 """)
-st.write("""- Led cross-functional team of 6 using Scrum, managing sprint planning and delivery across 3 active sprint cycles per month with 95%+ on-time delivery.
+st.markdown("""- Led cross-functional team of 6 using Scrum, managing sprint planning and delivery across 3 active sprint cycles per month with 95%+ on-time delivery.
 - Facilitated daily stand-ups and retrospectives via Jira/Confluence, reducing sprint carry-over by 30%.
 - Owned end-to-end product roadmap and release calendar, aligning milestones to business OKRs.
 - Designed and executed QA strategy reducing post-release defect rate by 25%.
@@ -70,41 +70,59 @@ st.write("""- Led cross-functional team of 6 using Scrum, managing sprint planni
 
 st.subheader("Freelance Project Management Consulting | Independent")
 st.caption("Career development period | Apr 2022 - Dec 2022")
-st.write("""- Completed Atlassian Jira Foundation and Lean Six Sigma (White, Yellow, Advanced Yellow Belt) certifications.
+st.markdown("""- Completed Atlassian Jira Foundation and Lean Six Sigma (White, Yellow, Advanced Yellow Belt) certifications.
 - Undertook freelance advisory work in project process documentation and team workflow optimisation.
-"")
+""")
 
+st.subheader("Software Project Manager | Sydney School of Business & Technology Pty Ltd")
+st.caption("Indian - client: Australian RTO | Jul 2021 - Apr 2022")
+st.markdown("Delivered a cloud-based student management system, working closely with Australian stakeholders to ensure alignment with business needs.")
+St.markdown("""
+- Delivered ISTUDI (student management platform) from requirements to go-live in under 10 months using Agile/Scrum (120+ user stories).
+- Defined user stories and acceptance criteria with Australian product owners.
+- Conducted sprint reviews with Sydney-based stakeholders to validate delivery and refine roadmap.
+- Oversaw integration/usability testing using MS SQL and PostgreSQL for Australian education reporting.
+- Coordinated async updates via MS Teams/Slack, reducing meeting overhead by 20%.
+""")
 
 st.subheader("Database Administrator & Product Manager | Total Synergy Concepts Pvt Ltd")
 st.caption("Amritsar - client: Australian RTO software provider | Nov 2019 - Jun 2021")
-st.write("- Managed product improvement sprints using Teamwork and Zendesk to align delivery with client KPIs.")
-st.write("- Analysed product and compliance data using MS SQL and Excel to support AVETMISS reporting accuracy.")
-st.write("- Maintained live risk register, ensuring zero compliance-impacting defects at release.")
+st.markdown("""
+- Managed product improvement sprints using Teamwork and Zendesk to align delivery with client KPIs.
+- Analysed product and compliance data using MS SQL and Excel to support AVETMISS reporting accuracy.
+"- Maintained live risk register, ensuring zero compliance-impacting defects at release.
+""")
 
 st.subheader("Senior Product Support Manager | Dream Net Software Pvt Ltd")
 st.caption("Amritsar - Australian-focused RTO/VET software | Nov 2010 - Oct 2019")
-st.write("- Translated Australian client requirements into detailed user stories and sprint tasks via Teamwork, Asana, GitHub, and Postman.")
-st.write("- Managed compliance-critical delivery meeting Australian VET standards: CRICOS, AVETMISS, VFH/VSL.")
-st.write("- Led client onboarding/data migration projects using MS SQL and PostgreSQL, reducing onboarding time by 35%.")
-st.write("- Coordinated directly with Australian users and compliance officers to meet regulatory obligations.")
+st.markdown("""
+- Translated Australian client requirements into detailed user stories and sprint tasks via Teamwork, Asana, GitHub, and Postman.")
+- Managed compliance-critical delivery meeting Australian VET standards: CRICOS, AVETMISS, VFH/VSL.
+- Led client onboarding/data migration projects using MS SQL and PostgreSQL, reducing onboarding time by 35%.
+- Coordinated directly with Australian users and compliance officers to meet regulatory obligations.
+""")
 
 st.subheader("Support Team Lead | Dream Net Software Pvt Ltd")
 st.caption("Amritsar - Australian RTO client base | Nov 2008 - Oct 2010")
-st.write("- Managed escalated client issues via Zendesk, performing root cause analysis and usability testing.")
-st.write("- Maintained MS SQL database backups and shared performance insights in team retrospectives.")
-st.write("- Mentored junior staff and established documentation, reducing first-response resolution time by 20%.")
+st.markdown("""
+- Managed escalated client issues via Zendesk, performing root cause analysis and usability testing.
+- Maintained MS SQL database backups and shared performance insights in team retrospectives.
+- Mentored junior staff and established documentation, reducing first-response resolution time by 20%.
+""")
 
 st.subheader("WFM Executive / Subject Matter Expert / Technical Support | Kochar InfoTech Pvt Ltd")
 st.caption("Oct 2005 - Oct 2008")
-st.write("- Managed workforce scheduling and employee data for major telecom clients: Airtel, Aircel, Idea.")
-st.write("- Designed business performance improvement plans, increasing operational efficiency.")
-st.write("- Handled complex technical escalations and implemented systemic solutions to reduce repeat incidents.")
+st.markdown("""
+- Managed workforce scheduling and employee data for major telecom clients: Airtel, Aircel, Idea.
+- Designed business performance improvement plans, increasing operational efficiency.
+- Handled complex technical escalations and implemented systemic solutions to reduce repeat incidents.
+""")
 
 # --- KEY CONTRIBUTIONS ---
 st.header("Key Contributions")
 # st.markdown("### EduRP SMS - Finance Module, Timetabling & WhatsApp Integration (Mar 2024 - Present)")
 
-st.write("""- Improved delivery reliability through structured Agile practices.
+st.markdown("""- Improved delivery reliability through structured Agile practices.
 - Strengthened stakeholder communication and reporting.
 - Enhanced coordination across cross-functional teams.
 - Reduced delivery issues through better planning and quality checks.
