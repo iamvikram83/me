@@ -76,14 +76,15 @@ st.markdown("""
 
 st.subheader("Software Project Manager | Sydney School of Business & Technology Pty Ltd")
 st.caption("Indian - client: Australian RTO | Jul 2021 - Apr 2022")
-st.write("Delivered a cloud-based student management system, working closely with Australian stakeholders to ensure alignment with business needs.")
-St.markdown("""
+st.markdown("Delivered a cloud-based student management system, working closely with Australian stakeholders to ensure alignment with business needs.")
+st.markdown("""
 - Delivered ISTUDI (student management platform) from requirements to go-live in under 10 months using Agile/Scrum (120+ user stories).
 - Defined user stories and acceptance criteria with Australian product owners.
 - Conducted sprint reviews with Sydney-based stakeholders to validate delivery and refine roadmap.
 - Oversaw integration/usability testing using MS SQL and PostgreSQL for Australian education reporting.
 - Coordinated async updates via MS Teams/Slack, reducing meeting overhead by 20%.
 """)
+
 
 st.subheader("Database Administrator & Product Manager | Total Synergy Concepts Pvt Ltd")
 st.caption("Amritsar - client: Australian RTO software provider | Nov 2019 - Jun 2021")
