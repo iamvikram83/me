@@ -147,7 +147,7 @@ st.table({
 # --- EDUCATION ---
 st.header("Education")
 st.table({
-    "Qualification": ["Bachelor of Computer Applications (BCA)", "Senior Secondary (+2) Non-Medical, High School / Matriculation (10th)],
+    "Qualification": ["Bachelor of Computer Applications (BCA)", "Senior Secondary (+2) Non-Medical", "High School / Matriculation (10th)"],
     "Issuing Body": ["Hindu College Amritsar","Punjab School Education Board", "Cedar Spring High School"], 
     "Passing Year": ["2002 - 2005", "2001 - 220", "1999 - 2001"]
 })
