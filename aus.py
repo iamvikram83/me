@@ -56,7 +56,7 @@ with c3:
 st.header("Work Experience")
 
 st.subheader("Software Project Manager | Truly Imagine Pty Ltd")
-st.caption("Remote - Australian-based company | Jan 2023 - May 2025")
+st.caption("Remotely (Hyderabd) - Australian-based company | Jan 2023 - May 2025")
 st.write("Led delivery of SaaS-based platforms for Australian stakeholders, managing distributed teams and ensuring alignment between business expectations and technical execution.")
 st.markdown("""
 - Led cross-functional team of 6 using Scrum, managing sprint planning and delivery across 3 active sprint cycles per month with 95%+ on-time delivery.
@@ -75,7 +75,7 @@ st.markdown("""
 """)
 
 st.subheader("Software Project Manager | Sydney School of Business & Technology Pty Ltd")
-st.caption("Indian - client: Australian RTO | Jul 2021 - Apr 2022")
+st.caption("Remotely (Amritsar) - Australian-based company | Jul 2021 - Apr 2022")
 st.markdown("Delivered a cloud-based student management system, working closely with Australian stakeholders to ensure alignment with business needs.")
 st.markdown("""
 - Delivered ISTUDI (student management platform) from requirements to go-live in under 10 months using Agile/Scrum (120+ user stories).
@@ -87,7 +87,7 @@ st.markdown("""
 
 
 st.subheader("Database Administrator & Product Manager | Total Synergy Concepts Pvt Ltd")
-st.caption("Amritsar - client: Australian RTO software provider | Nov 2019 - Jun 2021")
+st.caption("Remotely (Amritsar) - Australian Student Management System | Nov 2019 - Jun 2021")
 st.markdown("""
 - Managed product improvement sprints using Teamwork and Zendesk to align delivery with client KPIs.
 - Analysed product and compliance data using MS SQL and Excel to support AVETMISS reporting accuracy.
@@ -95,7 +95,7 @@ st.markdown("""
 """)
 
 st.subheader("Senior Product Support Manager | Dream Net Software Pvt Ltd")
-st.caption("Amritsar - Australian-focused RTO/VET software | Nov 2010 - Oct 2019")
+st.caption("Remotely (Amritsar) - Australian Student Management System | Nov 2010 - Oct 2019")
 st.markdown("""
 - Translated Australian client requirements into detailed user stories and sprint tasks via Teamwork, Asana, GitHub, and Postman.")
 - Managed compliance-critical delivery meeting Australian VET standards: CRICOS, AVETMISS, VFH/VSL.
@@ -104,7 +104,7 @@ st.markdown("""
 """)
 
 st.subheader("Support Team Lead | Dream Net Software Pvt Ltd")
-st.caption("Amritsar - Australian RTO client base | Nov 2008 - Oct 2010")
+st.caption("Remotely (Amritsar) - Australian Student Management System | Nov 2008 - Oct 2010")
 st.markdown("""
 - Managed escalated client issues via Zendesk, performing root cause analysis and usability testing.
 - Maintained MS SQL database backups and shared performance insights in team retrospectives.
