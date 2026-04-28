@@ -146,13 +146,14 @@ st.table({
 
 # --- EDUCATION ---
 st.header("Education")
-st.markdown("""
-- **Bachelor of Computer Applications (BCA):** Hindu College - Computer Application (2003-2006)
-- **Senior Secondary (+2):** Non-Medical, Punjab School Education Board (2001-2003)
-- **High School / Matriculation (10th):** Cedar Spring High School (1999-2001)
-""")
+st.table({
+    "Qualification": ["Bachelor of Computer Applications (BCA)", "Senior Secondary (+2) Non-Medical, High School / Matriculation (10th)],
+    "Issuing Body": ["Hindu College Amritsar","Punjab School Education Board", "Cedar Spring High School"], 
+    "Passing Year": ["2002 - 2005", "2001 - 220", "1999 - 2001"]
+})
+
+
 
 # --- REFEREES ---
 st.write("---")
-st.write("**Note**")
-st.write("*Professional referees available on request. Australian-based references can be provided.*")
+st.write("**Note:** * Professional referees available on request. Australian-based references can be provided.*")
