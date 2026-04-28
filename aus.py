@@ -109,13 +109,13 @@ st.write("- Handled complex technical escalations and implemented systemic solut
 # --- KEY CONTRIBUTIONS ---
 st.header("Key Contributions")
 # st.markdown("### EduRP SMS - Finance Module, Timetabling & WhatsApp Integration (Mar 2024 - Present)")
-st.write("- Improved delivery reliability through structured Agile practices.")
-st.write("- Strengthened stakeholder communication and reporting.")
-st.write("- Enhanced coordination across cross-functional teams.")
-st.write("- Reduced delivery issues through better planning and quality checks.")
-st.write("- Built consistent and accountable delivery processes.")
 
-
+st.write("""- Improved delivery reliability through structured Agile practices.
+- Strengthened stakeholder communication and reporting.
+- Enhanced coordination across cross-functional teams.
+- Reduced delivery issues through better planning and quality checks.
+- Built consistent and accountable delivery processes.
+""")
 # --- AI TOOLS & ADOPTION ---
 st.header("AI Tools & Adoption")
 st.write("- **ChatGPT & Claude:** Prompt engineering for sprint documentation, retrospective summaries, user story drafting, and stakeholder reports.")
