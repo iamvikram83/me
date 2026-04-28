@@ -25,7 +25,8 @@ st.header("Why I'm a Strong Fit for Australian Employers")
 col1, col2 = st.columns(2)
 with col1:
     st.subheader("Australian Domain & Workplace")
-    st.write("- **Domain Experience:** Delivered RTO/VET software for clients including Truly Imagine, Sydney School of Business and Technology, Total Synergy Concepts and Dream Net Software covering AVETMISS, CRICOS, VFH/VSL compliance frameworks.")
+    st.write("- **Domain Experience:**")
+    st.write(" Delivered RTO/VET software for clients including Truly Imagine, Sydney School of Business and Technology, Total Synergy Concepts and Dream Net Software covering AVETMISS, CRICOS, VFH/VSL compliance frameworks.")
     st.write("- **Workplace Alignment:** Worked directly with Australian-based product teams (Truly Imagine Pty Ltd, Sydney School of Business & Technology), demonstrating collaboration, accountability, and clear communication.")
 with col2:
     st.subheader("Delivery & Improvement")
