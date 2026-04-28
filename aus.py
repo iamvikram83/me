@@ -56,7 +56,7 @@ with c3:
 st.header("Work Experience")
 
 st.subheader("Software Project Manager | Truly Imagine Pty Ltd")
-st.caption("Remotely (Hyderabd) - Australian-based company | Jan 2023 - May 2025")
+st.caption("Remotely (Hyderabd) - Australian Student Management System | Jan 2023 - May 2025")
 st.write("Led delivery of SaaS-based platforms for Australian stakeholders, managing distributed teams and ensuring alignment between business expectations and technical execution.")
 st.markdown("""
 - Led cross-functional team of 6 using Scrum, managing sprint planning and delivery across 3 active sprint cycles per month with 95%+ on-time delivery.
@@ -75,7 +75,7 @@ st.markdown("""
 """)
 
 st.subheader("Software Project Manager | Sydney School of Business & Technology Pty Ltd")
-st.caption("Remotely (Amritsar) - Australian-based company | Jul 2021 - Apr 2022")
+st.caption("Remotely (Amritsar) - Australian Student Management System | Jul 2021 - Apr 2022")
 st.markdown("Delivered a cloud-based student management system, working closely with Australian stakeholders to ensure alignment with business needs.")
 st.markdown("""
 - Delivered ISTUDI (student management platform) from requirements to go-live in under 10 months using Agile/Scrum (120+ user stories).
@@ -112,7 +112,7 @@ st.markdown("""
 """)
 
 st.subheader("WFM Executive / Subject Matter Expert / Technical Support | Kochar InfoTech Pvt Ltd")
-st.caption("Oct 2005 - Oct 2008")
+st.caption("Amritsar | Oct 2005 - Oct 2008")
 st.markdown("""
 - Managed workforce scheduling and employee data for major telecom clients: Airtel, Aircel, Idea.
 - Designed business performance improvement plans, increasing operational efficiency.
