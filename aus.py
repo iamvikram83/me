@@ -20,8 +20,6 @@ Experienced in delivering end-to-end SaaS and digital platforms, working closely
 Brings a strong understanding of working with Australian organisations, including stakeholder engagement, transparency in reporting, and accountability for delivery outcomes.
 """)
 
-st.write("\033[4m" + "YourWord" + "\033[0m")
-
 # --- WHY I'M A STRONG FIT FOR AUSTRALIAN EMPLOYERS ---
 st.header("Why I'm a Strong Fit for Australian Employers")
 col1, col2 = st.columns(2)
@@ -108,16 +106,15 @@ st.write("- Managed workforce scheduling and employee data for major telecom cli
 st.write("- Designed business performance improvement plans, increasing operational efficiency.")
 st.write("- Handled complex technical escalations and implemented systemic solutions to reduce repeat incidents.")
 
-# --- KEY PROJECTS ---
-st.header("Key Projects")
-st.markdown("### EduRP SMS - Finance Module, Timetabling & WhatsApp Integration (Mar 2024 - Present)")
-st.write("- Facilitated Agile sprints for redesign and WhatsApp integration, managing the release roadmap end-to-end.")
-st.write("- Achieved zero critical defects at Finance Module go-live and improved timetabling accuracy by 40%.")
-st.write("- Optimised feature delivery via cross-functional collaboration across time zones.")
+# --- KEY CONTRIBUTIONS ---
+st.header("Key Contributions")
+# st.markdown("### EduRP SMS - Finance Module, Timetabling & WhatsApp Integration (Mar 2024 - Present)")
+st.write("- Improved delivery reliability through structured Agile practices.")
+st.write("- Strengthened stakeholder communication and reporting.")
+st.write("- Enhanced coordination across cross-functional teams.")
+st.write("- Reduced delivery issues through better planning and quality checks.")
+st.write("- Built consistent and accountable delivery processes.")
 
-st.markdown("### ISTUDI - Student Management System (Jul 2021 - Apr 2022)")
-st.write("- Delivered full-stack platform for an Australian RTO in under 10 months (120+ user stories across 4-week sprints).")
-st.write("- Ensured compliance with Australian education data standards and AVETMISS-aligned reporting.")
 
 # --- AI TOOLS & ADOPTION ---
 st.header("AI Tools & Adoption")
