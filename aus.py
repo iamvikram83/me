@@ -20,7 +20,7 @@ Experienced in delivering end-to-end SaaS and digital platforms, working closely
 Brings a strong understanding of working with Australian organisations, including stakeholder engagement, transparency in reporting, and accountability for delivery outcomes.
 """)
 
-print("\033[4m" + "YourWord" + "\033[0m")
+st.write("\033[4m" + "YourWord" + "\033[0m")
 
 # --- WHY I'M A STRONG FIT FOR AUSTRALIAN EMPLOYERS ---
 st.header("Why I'm a Strong Fit for Australian Employers")
