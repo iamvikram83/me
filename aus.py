@@ -57,10 +57,11 @@ st.header("Work Experience")
 
 st.subheader("Software Project Manager | Truly Imagine Pty Ltd")
 st.caption("Remote - Australian-based company | Jan 2023 - May 2025")
-st.write("""
+st.mardown("""
 Led delivery of SaaS-based platforms for Australian stakeholders, managing distributed teams and ensuring alignment between business expectations and technical execution.
 """)
-st.markdown("""- Led cross-functional team of 6 using Scrum, managing sprint planning and delivery across 3 active sprint cycles per month with 95%+ on-time delivery.
+st.markdown("""
+- Led cross-functional team of 6 using Scrum, managing sprint planning and delivery across 3 active sprint cycles per month with 95%+ on-time delivery.
 - Facilitated daily stand-ups and retrospectives via Jira/Confluence, reducing sprint carry-over by 30%.
 - Owned end-to-end product roadmap and release calendar, aligning milestones to business OKRs.
 - Designed and executed QA strategy reducing post-release defect rate by 25%.
@@ -70,13 +71,14 @@ st.markdown("""- Led cross-functional team of 6 using Scrum, managing sprint pla
 
 st.subheader("Freelance Project Management Consulting | Independent")
 st.caption("Career development period | Apr 2022 - Dec 2022")
-st.markdown("""- Completed Atlassian Jira Foundation and Lean Six Sigma (White, Yellow, Advanced Yellow Belt) certifications.
+st.markdown("""
+- Completed Atlassian Jira Foundation and Lean Six Sigma (White, Yellow, Advanced Yellow Belt) certifications.
 - Undertook freelance advisory work in project process documentation and team workflow optimisation.
 """)
 
 st.subheader("Software Project Manager | Sydney School of Business & Technology Pty Ltd")
 st.caption("Indian - client: Australian RTO | Jul 2021 - Apr 2022")
-st.markdown("Delivered a cloud-based student management system, working closely with Australian stakeholders to ensure alignment with business needs.")
+st.write("Delivered a cloud-based student management system, working closely with Australian stakeholders to ensure alignment with business needs.")
 St.markdown("""
 - Delivered ISTUDI (student management platform) from requirements to go-live in under 10 months using Agile/Scrum (120+ user stories).
 - Defined user stories and acceptance criteria with Australian product owners.
