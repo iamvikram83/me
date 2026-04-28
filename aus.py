@@ -121,34 +121,38 @@ st.markdown("""
 
 # --- KEY CONTRIBUTIONS ---
 st.header("Key Contributions")
-# st.markdown("### EduRP SMS - Finance Module, Timetabling & WhatsApp Integration (Mar 2024 - Present)")
-
 st.markdown("""- Improved delivery reliability through structured Agile practices.
 - Strengthened stakeholder communication and reporting.
 - Enhanced coordination across cross-functional teams.
 - Reduced delivery issues through better planning and quality checks.
 - Built consistent and accountable delivery processes.
 """)
+
 # --- AI TOOLS & ADOPTION ---
 st.header("AI Tools & Adoption")
-st.write("- **ChatGPT & Claude:** Prompt engineering for sprint documentation, retrospective summaries, user story drafting, and stakeholder reports.")
-st.write("- **Notion AI / Confluence AI:** AI-assisted knowledge management and meeting summarisation.")
-st.write("- **AI-powered Analytics:** Exploring Power BI Copilot for delivery reporting and real-time sprint insight generation.")
+st.markdown("""
+- **ChatGPT & Claude:** Prompt engineering for sprint documentation, retrospective summaries, user story drafting, and stakeholder reports.
+- **Notion AI / Confluence AI:** AI-assisted knowledge management and meeting summarisation.
+- **AI-powered Analytics:** Exploring Power BI Copilot for delivery reporting and real-time sprint insight generation.
+""")
 
 # --- CERTIFICATIONS ---
 st.header("Certifications")
 st.table({
-    "Certification": ["Beginner's Guide to Agile in Jira", "Jira Foundation Badge", "Lean Six Sigma Yellow Belt", "Advanced LSS Yellow Belt", "Lean Six Sigma White Belt", "PMP (In Progress)", "Certified Scrum Master (Planned)"],
-    "Issuing Body": ["Atlassian", "Atlassian", "Daniel Holzer", "Sparen & Gewinn Consulting", "Opex Learning", "PMI", "Scrum Alliance"],
-    "Date/ID": ["215343779 | Jul 2022", "213760790 | Jun 2022", "8769Q54C | Jul 2022", "SG0722YB000277 | Jul 2022", "2022993422 | Jun 2022", "Target: 2025-26", "Target: 2025-26"]
+    "Certification": ["Beginner's Guide to Agile in Jira", "Jira Foundation Badge", "Lean Six Sigma Yellow Belt", "Advanced LSS Yellow Belt", "Lean Six Sigma White Belt"],
+    "Issuing Body": ["Atlassian", "Atlassian", "Daniel Holzer", "Sparen & Gewinn Consulting", "Opex Learning"],
+    "ID/Date": ["215343779 | Jul 2022", "213760790 | Jun 2022", "8769Q54C | Jul 2022", "SG0722YB000277 | Jul 2022", "2022993422 | Jun 2022"]
 })
 
 # --- EDUCATION ---
 st.header("Education")
-st.write("- **Bachelor of Computer Applications (BCA):** Hindu College - Computer Application (2003-2006)")
-st.write("- **Senior Secondary (+2):** Non-Medical, Punjab School Education Board (2001-2003)")
-st.write("- **High School / Matriculation (10th):** Cedar Spring High School (1999-2001)")
+st.markdown("""
+- **Bachelor of Computer Applications (BCA):** Hindu College - Computer Application (2003-2006)
+- **Senior Secondary (+2):** Non-Medical, Punjab School Education Board (2001-2003)
+- **High School / Matriculation (10th):** Cedar Spring High School (1999-2001)
+""")
 
 # --- REFEREES ---
 st.write("---")
-st.write("**Professional referees available on request. Australian-based references can be provided.**")
+st.write("**Note**")
+st.write("*Professional referees available on request. Australian-based references can be provided.*")
