@@ -57,9 +57,7 @@ st.header("Work Experience")
 
 st.subheader("Software Project Manager | Truly Imagine Pty Ltd")
 st.caption("Remote - Australian-based company | Jan 2023 - May 2025")
-st.mardown("""
-Led delivery of SaaS-based platforms for Australian stakeholders, managing distributed teams and ensuring alignment between business expectations and technical execution.
-""")
+st.write("Led delivery of SaaS-based platforms for Australian stakeholders, managing distributed teams and ensuring alignment between business expectations and technical execution.")
 st.markdown("""
 - Led cross-functional team of 6 using Scrum, managing sprint planning and delivery across 3 active sprint cycles per month with 95%+ on-time delivery.
 - Facilitated daily stand-ups and retrospectives via Jira/Confluence, reducing sprint carry-over by 30%.
