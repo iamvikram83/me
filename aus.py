@@ -60,26 +60,20 @@ st.caption("Remote - Australian-based company | Jan 2023 - May 2025")
 st.write("""
 Led delivery of SaaS-based platforms for Australian stakeholders, managing distributed teams and ensuring alignment between business expectations and technical execution.
 """)
-st.write("- Led cross-functional team of 6 using Scrum, managing sprint planning and delivery across 3 active sprint cycles per month with 95%+ on-time delivery.")
-st.write("- Facilitated daily stand-ups and retrospectives via Jira/Confluence, reducing sprint carry-over by 30%.")
-st.write("- Owned end-to-end product roadmap and release calendar, aligning milestones to business OKRs.")
-st.write("- Designed and executed QA strategy reducing post-release defect rate by 25%.")
-st.write("- Collaborated via GitHub/GitLab and Postman to streamline API integration and CI/CD visibility.")
-st.write("- Maintained sprint artifacts and risk logs in Google Workspace/Confluence for full transparency.")
+st.write("""- Led cross-functional team of 6 using Scrum, managing sprint planning and delivery across 3 active sprint cycles per month with 95%+ on-time delivery.
+- Facilitated daily stand-ups and retrospectives via Jira/Confluence, reducing sprint carry-over by 30%.
+- Owned end-to-end product roadmap and release calendar, aligning milestones to business OKRs.
+- Designed and executed QA strategy reducing post-release defect rate by 25%.
+- Collaborated via GitHub/GitLab and Postman to streamline API integration and CI/CD visibility.
+- Maintained sprint artifacts and risk logs in Google Workspace/Confluence for full transparency.
+""")
 
 st.subheader("Freelance Project Management Consulting | Independent")
 st.caption("Career development period | Apr 2022 - Dec 2022")
-st.write("- Completed Atlassian Jira Foundation and Lean Six Sigma (White, Yellow, Advanced Yellow Belt) certifications.")
-st.write("- Undertook freelance advisory work in project process documentation and team workflow optimisation.")
+st.write("""- Completed Atlassian Jira Foundation and Lean Six Sigma (White, Yellow, Advanced Yellow Belt) certifications.
+- Undertook freelance advisory work in project process documentation and team workflow optimisation.
+"")
 
-st.subheader("Software Project Manager | Sydney School of Business & Technology Pty Ltd")
-st.caption("India - client: Australian RTO | Jul 2021 - Apr 2022")
-st.write("Delivered a cloud-based student management system, working closely with Australian stakeholders to ensure alignment with business needs.")
-st.write("- Delivered ISTUDI (student management platform) from requirements to go-live in under 10 months using Agile/Scrum (120+ user stories).")
-st.write("- Defined user stories and acceptance criteria with Australian product owners.")
-st.write("- Conducted sprint reviews with Sydney-based stakeholders to validate delivery and refine roadmap.")
-st.write("- Oversaw integration/usability testing using MS SQL and PostgreSQL for Australian education reporting.")
-st.write("- Coordinated async updates via MS Teams/Slack, reducing meeting overhead by 20%.")
 
 st.subheader("Database Administrator & Product Manager | Total Synergy Concepts Pvt Ltd")
 st.caption("Amritsar - client: Australian RTO software provider | Nov 2019 - Jun 2021")
