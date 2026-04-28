@@ -25,13 +25,16 @@ st.header("Why I'm a Strong Fit for Australian Employers")
 col1, col2 = st.columns(2)
 with col1:
     st.subheader("Australian Domain & Workplace")
-    st.write("- **Domain Experience:**")
-    st.write(" Delivered RTO/VET software for clients including Truly Imagine, Sydney School of Business and Technology, Total Synergy Concepts and Dream Net Software covering AVETMISS, CRICOS, VFH/VSL compliance frameworks.")
-    st.write("- **Workplace Alignment:** Worked directly with Australian-based product teams (Truly Imagine Pty Ltd, Sydney School of Business & Technology), demonstrating collaboration, accountability, and clear communication.")
+    st.write("**Domain Experience**")
+    st.write("Delivered RTO/VET software for clients including Truly Imagine, Sydney School of Business and Technology, Total Synergy Concepts and Dream Net Software covering AVETMISS, CRICOS, VFH/VSL compliance frameworks.")
+    st.write("**Workplace Alignment**") 
+    st.write("Worked directly with Australian-based product teams (Truly Imagine Pty Ltd, Sydney School of Business & Technology), demonstrating collaboration, accountability, and clear communication.")
 with col2:
     st.subheader("Delivery & Improvement")
-    st.write("- **Agile Excellence:** 18+ years managing Agile/Scrum teams with 95%+ on-time delivery, 30% reduction in sprint carry-over, and 35% faster client onboarding.")
-    st.write("- **Mindset:** Certified Lean Six Sigma practitioner with a track record of driving process improvement and reducing defect rates.")
+    st.write("**Agile Excellence**") 
+    st.write("18+ years managing Agile/Scrum teams with 95%+ on-time delivery, 30% reduction in sprint carry-over, and 35% faster client onboarding.")
+    st.write("**Mindset**") 
+    st.write("Certified Lean Six Sigma practitioner with a track record of driving process improvement and reducing defect rates.")
 
 # --- CORE COMPETENCIES ---
 st.header("Core Competencies")
@@ -57,8 +60,6 @@ st.caption("Remote - Australian-based company | Jan 2023 - May 2025")
 st.write("""
 Led delivery of SaaS-based platforms for Australian stakeholders, managing distributed teams and ensuring alignment between business expectations and technical execution.
 """)
-st.write("- Improved delivery consistency by introducing structured sprint planning and backlog prioritisation, resulting in more predictable outcomes across multiple sprint cycles. - Maintained clear communication with stakeholders through regular updates and delivery reporting, ensuring visibility into progress and risks.")
-
 st.write("- Led cross-functional team of 6 using Scrum, managing sprint planning and delivery across 3 active sprint cycles per month with 95%+ on-time delivery.")
 st.write("- Facilitated daily stand-ups and retrospectives via Jira/Confluence, reducing sprint carry-over by 30%.")
 st.write("- Owned end-to-end product roadmap and release calendar, aligning milestones to business OKRs.")
@@ -73,6 +74,7 @@ st.write("- Undertook freelance advisory work in project process documentation a
 
 st.subheader("Software Project Manager | Sydney School of Business & Technology Pty Ltd")
 st.caption("India - client: Australian RTO | Jul 2021 - Apr 2022")
+st.write("Delivered a cloud-based student management system, working closely with Australian stakeholders to ensure alignment with business needs.")
 st.write("- Delivered ISTUDI (student management platform) from requirements to go-live in under 10 months using Agile/Scrum (120+ user stories).")
 st.write("- Defined user stories and acceptance criteria with Australian product owners.")
 st.write("- Conducted sprint reviews with Sydney-based stakeholders to validate delivery and refine roadmap.")
