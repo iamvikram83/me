@@ -5,19 +5,19 @@ st.set_page_config(page_title="Vikramjit Singh | Complete Portfolio", layout="wi
 
 # --- HEADER SECTION ---
 st.title("Vikramjit Singh")
-st.subheader("Software Project Manager | Team Lead | Agile & Scrum Specialist")
-st.markdown("📍 Hyderabad, India (Open to relocation to Australia) | 📞 (+91) 9781381213")
+st.subheader("Software Delivery Leader | EdTech & SaaS Platforms | Agile Programs")
+st.markdown("📍 Hyderabad, India (Open to Relocation: Australia) | 📞 (+91) 9781381213")
 st.markdown("✉️ kuwar.vikram@gmail.com | [LinkedIn Profile](https://www.linkedin.com/in/vsasr)")
 st.write("---")
 
 # --- PROFESSIONAL SUMMARY ---
 st.header("Professional Summary")
 st.write("""
-Software Project Manager and Team Lead with 18+ years delivering enterprise software for Australian and Indian markets 
-including RTO/VET compliance systems (AVETMISS, CRICOS, VFH/VSL) and EdTech platforms. Proven in leading 
-cross-functional Agile/Scrum teams, managing full product roadmaps, driving stakeholder engagement, and applying 
-Lean Six Sigma principles for continuous improvement. Deep familiarity with the Australian VET sector through 
-direct RTO software delivery and AVETMISS data migrations. Available immediately and open to relocation to Australia.
+Delivery-focused technology leader with 18+ years of experience managing software programs across Agile environments, with strong exposure to Australian clients and business expectations.
+
+Experienced in delivering end-to-end SaaS and digital platforms, working closely with product teams, stakeholders, and engineering functions to ensure practical, outcome-driven delivery. Known for improving delivery reliability, strengthening team accountability, and maintaining clear communication across distributed teams.
+
+Brings a strong understanding of working with Australian organisations, including stakeholder engagement, transparency in reporting, and accountability for delivery outcomes.
 """)
 
 # --- WHY I'M A STRONG FIT FOR AUSTRALIAN EMPLOYERS ---
@@ -25,7 +25,7 @@ st.header("Why I'm a Strong Fit for Australian Employers")
 col1, col2 = st.columns(2)
 with col1:
     st.subheader("Australian Domain & Workplace")
-    st.write("- **Domain Experience:** Delivered RTO/VET software for clients including Total Synergy Concepts and Dream Net Software covering AVETMISS, CRICOS, VFH/VSL compliance frameworks.")
+    st.write("- **Domain Experience:** Delivered RTO/VET software for clients including Truly Imagine, Sydney School of Business and Technology, Total Synergy Concepts and Dream Net Software covering AVETMISS, CRICOS, VFH/VSL compliance frameworks.")
     st.write("- **Workplace Alignment:** Worked directly with Australian-based product teams (Truly Imagine Pty Ltd, Sydney School of Business & Technology), demonstrating collaboration, accountability, and clear communication.")
 with col2:
     st.subheader("Delivery & Improvement")
@@ -53,6 +53,11 @@ st.header("Work Experience")
 
 st.subheader("Software Project Manager | Truly Imagine Pty Ltd")
 st.caption("Remote - Australian-based company | Jan 2023 - May 2025")
+st.write("""
+Led delivery of SaaS-based platforms for Australian stakeholders, managing distributed teams and ensuring alignment between business expectations and technical execution.
+""")
+st.write("- Improved delivery consistency by introducing structured sprint planning and backlog prioritisation, resulting in more predictable outcomes across multiple sprint cycles. - Maintained clear communication with stakeholders through regular updates and delivery reporting, ensuring visibility into progress and risks.")
+
 st.write("- Led cross-functional team of 6 using Scrum, managing sprint planning and delivery across 3 active sprint cycles per month with 95%+ on-time delivery.")
 st.write("- Facilitated daily stand-ups and retrospectives via Jira/Confluence, reducing sprint carry-over by 30%.")
 st.write("- Owned end-to-end product roadmap and release calendar, aligning milestones to business OKRs.")
