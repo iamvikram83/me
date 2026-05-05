@@ -75,7 +75,9 @@ if st.button("Generate Book Blueprint"):
 
 # Editable Section
 if st.session_state.blueprint_df is not None:
-    st.subheader("Edit Your Blueprint (Orientation is Clickable)")
+    st.subheader("Your Book Blueprint")
+    st.subheader("Modify orientation if you want to")
+
     
     # Use the returned dataframe from the editor to ensure changes are captured
     final_df = st.data_editor(
