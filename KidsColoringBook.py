@@ -3,7 +3,7 @@ import pandas as pd
 from io import BytesIO
 from docx import Document
 
-# 1. Enhanced CSS for UI and Text Wrapping
+# 1. UI Styling: Background, Text Wrapping, and Clean Title
 st.markdown("""
     <style>
     [data-testid="stAppViewContainer"] {
@@ -16,14 +16,13 @@ st.markdown("""
         text-align: center;
         font-size: 2.5rem;
         font-weight: bold;
-        white-space: nowrap;
         padding-bottom: 30px;
     }
-    /* Critical: CSS to force wrapping in the Data Editor */
+    /* Force text wrapping in Data Editor cells */
     [data-testid="stDataEditor"] div[role="gridcell"] > div {
         white-space: normal !important;
         word-break: break-word !important;
-        line-height: 1.5 !important;
+        line-height: 1.4 !important;
     }
     .stDataEditor {
         background-color: white;
@@ -34,6 +33,7 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 def get_unique_header(page_num, topic, age_group):
+    """Generates unique instructions based on page index."""
     is_junior = "6-9" in age_group
     if is_junior:
         messages = [
@@ -53,32 +53,36 @@ def get_unique_header(page_num, topic, age_group):
         ]
     return messages[page_num % len(messages)]
 
-# --- Input Section ---
+# --- Input Section (2 columns per row) ---
 with st.container():
     r1_c1, r1_c2 = st.columns(2)
     with r1_c1:
-        topic = st.text_input("Book Topic", placeholder="e.g. Space Adventures", help="Main theme of the book.")
+        topic = st.text_input("Book Topic", placeholder="e.g. Space Adventures", help="Enter the theme of the coloring book.")
     with r1_c2:
-        page_count = st.number_input("Total Pages", min_value=1, value=1, help="Number of unique pages.")
+        page_count = st.number_input("Total Pages", min_value=1, value=1, help="Number of unique pages to generate.")
     
     r2_c1, r2_c2 = st.columns(2)
     with r2_c1:
-        age_group = st.selectbox("Age Group", ["3-5 years (Explorer)", "6-9 years (Junior Creator)"], help="Adjusts instruction tone.")
+        # Initialized with index=None to force user selection
+        age_group = st.selectbox("Age Group", options=["3-5 years (Explorer)", "6-9 years (Junior Creator)"], 
+                                 index=None, placeholder="Please select an age group...",
+                                 help="Selecting an age group determines the tone of the coloring instructions.")
     with r2_c2:
         style_list = st.multiselect("Styles", 
             ["Bold black line art", "Pure white background", "No shading", "High-contrast outlines", "Whimsical details"],
-            placeholder="Select artistic styles...")
+            placeholder="Select artistic styles...", 
+            help="Choose one or more styles that will be included in the AI visual prompt.")
 
-    # New Upload Field
-    ref_image = st.file_uploader("Upload reference to review style & placement", type=["png", "jpg", "jpeg"], 
-                                 help="Upload an existing coloring page to help the AI match style and orientation.")
+    # Optional Reference Field
+    ref_image = st.file_uploader("Upload reference to review (Optional)", type=["png", "jpg", "jpeg"], 
+                                 help="Non-mandatory: Upload an image to help the AI match style, content placement, or orientation.")
 
 if 'df' not in st.session_state:
     st.session_state.df = None
 
 if st.button("Generate Blueprint"):
-    if not topic or not style_list:
-        st.error("Please enter a topic and select at least one style.")
+    if not topic or not style_list or age_group is None:
+        st.error("Please fill in the Topic, select Styles, and choose an Age Group.")
     else:
         rows = []
         for i in range(1, page_count + 1):
@@ -93,27 +97,25 @@ if st.button("Generate Blueprint"):
 if st.session_state.df is not None:
     st.subheader("Interactive Blueprint Editor")
     
-    # Removed Branding column from display; kept Header Content with large width
     updated_df = st.data_editor(
         st.session_state.df,
         column_config={
             "Orientation": st.column_config.SelectboxColumn("Orientation", options=["Portrait", "Landscape"]),
             "Page Number": st.column_config.NumberColumn(disabled=True),
-            "Header Content": st.column_config.TextColumn("Header Content (Editable)", width="large", required=True)
+            "Header Content": st.column_config.TextColumn("Header Content (Editable)", width="large")
         },
         use_container_width=True,
         hide_index=True
     )
 
     st.markdown("---")
+    # Updated label
     gen_p = st.radio("Would you like to generate visual prompts based upon your book blue print?", ["No", "Yes"], horizontal=True)
 
     if gen_p == "Yes":
         all_prompts = []
         combined_styles = ", ".join(style_list)
-        
-        # If an image is uploaded, we add a mention of it to the style logic
-        ref_context = " (Reference style provided)" if ref_image else ""
+        ref_context = " (Match the uploaded reference style and placement)" if ref_image else ""
         
         for _, row in updated_df.iterrows():
             prompt = (
@@ -126,7 +128,6 @@ if st.session_state.df is not None:
             )
             all_prompts.append(prompt)
             
-            # COPY OPTION: st.code provides a built-in copy button
             st.markdown(f"**Copy Script for Page {row['Page Number']}**")
             st.code(prompt, language="text")
             st.markdown("---")
@@ -134,13 +135,17 @@ if st.session_state.df is not None:
         # --- Export Section ---
         st.markdown("### 📥 Export Section")
         with st.popover("Export Visual Prompts as"):
+            # Excel
             xl_bio = BytesIO()
             with pd.ExcelWriter(xl_bio, engine='openpyxl') as writer:
                 pd.DataFrame({"Visual Prompts": all_prompts}).to_excel(writer, index=False)
             st.download_button("Excel (.xlsx)", data=xl_bio.getvalue(), file_name="blueprint.xlsx", use_container_width=True)
+            
+            # CSV/Text
             st.download_button("CSV (.csv)", data="\n\n".join(all_prompts), file_name="blueprint.csv", use_container_width=True)
             st.download_button("Text (.txt)", data="\n\n".join(all_prompts), file_name="blueprint.txt", use_container_width=True)
             
+            # Word
             doc = Document()
             doc.add_heading(f"Blueprint: {topic}", 0)
             for p in all_prompts:
