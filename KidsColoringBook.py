@@ -1,81 +1,97 @@
 import streamlit as st
 import pandas as pd
 
-# Set professional page layout
-st.set_page_config(page_title="The LearnAi - Coloring Book Architect", layout="wide")
+# 1. Custom CSS for Sea Blue Background
+st.markdown("""
+    <style>
+    .stApp {
+        background-color: #006994;
+        color: white;
+    }
+    .stMarkdown, .stTable, .stDataFrame {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        padding: 10px;
+    }
+    </style>
+    """, unsafe_allow_get_template=True)
 
-def generate_content(topic, num_pages, age_group):
-    """
-    Logic engine to generate page-by-page blueprints based on branding rules.
-    """
+def generate_visual_prompt(row, style, topic):
+    """Formats the final visual prompt according to specific blueprint requirements."""
+    return (
+        f"Page {row['Page Number']}:\n"
+        f"Create a high-resolution, printable children's coloring page in {row['Orientation'].capitalize()} "
+        f"orientation (8.5 x 11 inches). Ensure high-quality line art and correct text placement for printing.\n\n"
+        f"The Content for Page {row['Page Number']}:\n"
+        f"Subject: {topic} - {row['Orientation']} composition. Wide, clear lines, no shading. Minimalist background.\n\n"
+        f"Top Header: {row['Header Content']}\n\n"
+        f"Footer Branding: {row['Branding']}\n\n"
+        f"Page Number: {row['Page Number']}\n\n"
+        f"Style: {style}"
+    )
+
+# --- UI Setup ---
+st.title("🎨 The LearnAi: Coloring Book Architect")
+
+# Sidebar/Form Inputs
+with st.container():
+    col1, col2 = st.columns(2)
+    with col1:
+        topic = st.text_input("Book Topic", "Kindness and Sharing")
+        page_count = st.number_input("Total Pages", min_value=1, value=5)
+    with col2:
+        age_group = st.selectbox("Age Group", ["3-5 years (Explorer)", "6-9 years (Junior Creator)"])
+        style_preset = st.selectbox("Artistic Style", [
+            "Bold black line art, pure white background, no shading, and high-contrast outlines",
+            "Fine line detail, whimsical patterns, white background, professional grade",
+            "Thick outlines, geometric shapes, minimalist background for toddlers"
+        ])
+
+# Initialize session state for the blueprint
+if 'blueprint_df' not in st.session_state:
+    st.session_state.blueprint_df = None
+
+if st.button("Generate Book Blueprint"):
     data = []
     is_junior = "6-9" in age_group
-
-    for i in range(1, num_pages + 1):
-        # Decisions on orientation based on page number for variety
-        orientation = "PORTRAIT" if i % 2 != 0 else "LANDSCAPE"
-        
-        # Age-specific copywriting logic
-        if is_junior:
-            header = f"Did you know {topic} has amazing details? Imagine this scene and use deep colors for shadows. [Designed by The LearnAi]"
-        else:
-            header = f"Here is a {topic}! Use your favorite bright colors and stay inside the lines. [Designed by The LearnAi]"
-        
-        # Visual prompt engineering
-        prompt = f"Kids coloring book style, black and white line art, {topic}, {orientation.lower()} view, bold outlines, no shading."
-
-        data.append({
-            "Page": i,
-            "Header Content": header,
-            "Orientation": orientation,
-            "Branding": "Designed by The LearnAi",
-            "Visual Prompt": prompt
-        })
-    return data
-
-# --- UI IMPLEMENTATION ---
-st.title("🎨 Kids' Coloring Book Blueprint Generator")
-st.markdown("### Expert EdTech Content Creator Tool | Powered by The LearnAi")
-
-# Step 1: Gather User Inputs
-with st.container():
-    st.info("Please enter the book details below to generate your blueprint.")
-    col1, col2, col3 = st.columns(3)
     
-    with col1:
-        topic = st.text_input("Topic", placeholder="e.g., Space Exploration")
-    with col2:
-        pages = st.number_input("Total Pages", min_value=1, max_value=100, value=10)
-    with col3:
-        age_range = st.selectbox("Target Age Group", ["3-5 years (Explorer)", "6-9 years (Junior Creator)"])
-
-# Step 2: Trigger Generation
-if st.button("Generate Full Blueprint"):
-    if not topic:
-        st.warning("Please provide a topic to generate the content.")
-    else:
-        results = generate_content(topic, pages, age_range)
-        df = pd.DataFrame(results)
-
-        # Step 3: Show Overview & Cover
-        st.success(f"Blueprint Generated for '{topic}'")
-        st.subheader("Book Layout Overview")
+    for i in range(1, page_count + 1):
+        orientation = "Portrait" if i % 2 != 0 else "Landscape"
+        header = (f"Did you know saying 'Please' and 'Thank You' acts like a 'social glue'? "
+                  if is_junior else f"Let's share fruit with friends! ")
         
-        # Cover Page Description
-        st.markdown(f"**📘 Cover Page:** High-energy, full-color illustration of {topic}. Featuring 'Designed by The LearnAi'.")
+        data.append({
+            "Page Number": i,
+            "Header Content": f"{header} [Designed by The LearnAi]",
+            "Orientation": orientation,
+            "Branding": "Designed by The LearnAi"
+        })
+    st.session_state.blueprint_df = pd.DataFrame(data)
 
-        # Display Table
-        st.dataframe(df, use_container_width=True)
+# 3. Editable Table (Orientation as inline editable)
+if st.session_state.blueprint_df is not None:
+    st.subheader("Edit Your Blueprint")
+    edited_df = st.data_editor(
+        st.session_state.blueprint_df,
+        column_config={
+            "Orientation": st.column_config.SelectboxColumn(
+                "Orientation",
+                options=["Portrait", "Landscape"],
+                required=True,
+            )
+        },
+        disabled=["Page Number", "Branding"],
+        num_rows="fixed",
+        use_container_width=True
+    )
+    
+    # 2. Ask User if they want to generate prompts
+    st.markdown("---")
+    gen_prompts = st.radio("Would you like to generate visual/image prompts?", ("No", "Yes"))
 
-        # Last Page Description
-        st.markdown("---")
-        st.markdown(f"**🖼️ Last Page:** Colorful Gallery Page showing all {pages} images. Email: learnaiwithvs@gmail.com. [Designed by The LearnAi]")
-
-        # Export Functionality
-        csv = df.to_csv(index=False).encode('utf-8')
-        st.download_button(
-            label="Download Blueprint as CSV",
-            data=csv,
-            file_name=f"{topic.replace(' ', '_')}_blueprint.csv",
-            mime='text/csv',
-        )
+    if gen_prompts == "Yes":
+        st.subheader("🚀 Final Visual Prompts for Image Generators")
+        for index, row in edited_df.iterrows():
+            final_prompt = generate_visual_prompt(row, style_preset, topic)
+            st.text_area(f"Page {row['Page Number']} Prompt", final_prompt, height=250)
+            st.markdown("---")
