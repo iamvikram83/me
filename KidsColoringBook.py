@@ -41,11 +41,11 @@ st.title("🎨 The LearnAi: Coloring Book Architect")
 with st.container():
     col1, col2 = st.columns(2)
     with col1:
-        topic = st.text_input("Book Topic", "Kindness and Sharing")
+        topic = st.text_input("Book Topic", "eg: Kindness and Sharing")
         page_count = st.number_input("Total Pages", min_value=1, value=5)
     with col2:
         age_group = st.selectbox("Age Group", ["3-5 years (Explorer)", "6-9 years (Junior Creator)"])
-        style_preset = st.selectbox("Style", [
+        style_preset = st.multiselect("Style", [
             "Bold black line art, pure white background, no shading, and high-contrast outlines for a professional coloring book look",
             "Fine line detail, whimsical patterns, white background, high-contrast outlines",
             "Thick bold lines, simple shapes, white background, no shading"
