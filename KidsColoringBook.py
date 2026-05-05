@@ -3,7 +3,7 @@ import pandas as pd
 from io import BytesIO
 from docx import Document
 
-# 1. CSS for Sea Blue Background and Horizontal Title Layout
+# 1. UI Styling: Sea Blue Background and Horizontal Title
 st.markdown("""
     <style>
     [data-testid="stAppViewContainer"] {
@@ -12,125 +12,127 @@ st.markdown("""
     .stMarkdown, p, h1, h2, h3, span, label {
         color: white !important;
     }
-    .main-title {
-        font-size: 2.5rem;
-        font-weight: bold;
+    .full-width-title {
+        width: 100%;
         text-align: center;
+        font-size: 2.2rem;
+        font-weight: bold;
+        padding: 10px 0px;
         white-space: nowrap;
+        border-bottom: 2px solid rgba(255,255,255,0.2);
         margin-bottom: 20px;
     }
     .stDataEditor {
         background-color: white;
-        border-radius: 5px;
+        border-radius: 8px;
     }
     </style>
-    <div class="main-title">🎨 The LearnAi: Kids' Coloring Book Architect</div>
+    <div class="full-width-title">🎨 The LearnAi: Kids' Coloring Book Architect</div>
     """, unsafe_allow_html=True)
 
-def generate_header(i, topic, is_junior):
-    """Generates unique educational/fun headers for each page."""
+def get_dynamic_header(index, topic, age_group):
+    """Generates unique instructions/facts for every page."""
+    is_junior = "6-9" in age_group
     if is_junior:
         facts = [
-            f"Did you know {topic} can be seen from great distances?",
-            f"The history of {topic} dates back hundreds of years!",
-            f"Scientists study {topic} to understand our world better.",
-            f"Every {topic} has a unique pattern, just like a fingerprint.",
-            f"Imagine you are exploring {topic} for the first time today!"
+            f"Did you know {topic} can be seen from space? Look at the amazing details!",
+            f"The history of {topic} is full of surprises. What colors represent its past?",
+            f"Scientists study {topic} to learn about our future. Use your imagination here!",
+            f"Every {topic} tells a story. What story will your colors tell today?",
+            f"Imagine {topic} in a world made of candy. What colors would you use then?"
         ]
-        return f"{facts[i % len(facts)]} [Designed by The LearnAi]"
+        return facts[index % len(facts)]
     else:
-        actions = [
-            f"Look at this big {topic}! Can you color it brightly?",
-            f"Trace the lines of the {topic} slowly and carefully.",
-            f"Use your favorite colors to make this {topic} beautiful!",
-            f"How many {topic} shapes can you count on this page?",
-            f"Stay inside the lines to make the {topic} pop!"
+        instructions = [
+            f"Can you find the hidden shapes in this {topic}? Color them first!",
+            f"Use your brightest crayons for this {topic}! You're doing great.",
+            f"Stay inside the thick lines of the {topic}. It looks wonderful!",
+            f"What is your favorite color for {topic}? Fill the whole page!",
+            f"Trace the edges of the {topic} before you start coloring the middle."
         ]
-        return f"{actions[i % len(actions)]} [Designed by The LearnAi]"
+        return instructions[index % len(instructions)]
 
-def generate_visual_prompt(row, style_list, topic):
-    styles = ", ".join(style_list)
-    return (
-        f"Page {row['Page Number']}:\n"
-        f"Create a high-resolution, printable children's coloring page in {row['Orientation']} "
-        f"orientation (8.5 x 11 inches).\n\n"
-        f"Subject: {topic} - {row['Orientation']} composition. {row['Header Content']}\n\n"
-        f"Style: {styles}\n\n"
-        f"Footer Branding: {row['Branding']}"
-    )
-
-# --- UI Implementation ---
+# --- Input Section ---
 with st.container():
-    col1, col2, col3 = st.columns([2, 1, 2])
-    with col1:
-        topic = st.text_input("Book Topic", placeholder="e.g., Space Adventures or Jungle Animals")
+    c1, c2, c3 = st.columns([2, 1, 2])
+    with c1:
+        topic = st.text_input("Book Topic", value="", placeholder="e.g. Space Adventures")
         page_count = st.number_input("Total Pages", min_value=1, value=1)
-    with col2:
+    with c2:
         age_group = st.selectbox("Age Group", ["3-5 years (Explorer)", "6-9 years (Junior Creator)"])
-    with col3:
-        style_presets = st.multiselect("Select Styles", [
-            "Bold black line art", "Pure white background", "No shading", 
-            "High-contrast outlines", "Whimsical patterns", "Minimalist background"
-        ], placeholder="Choose one or more styles")
+    with c3:
+        styles = st.multiselect("Visual Styles", 
+            ["Bold black line art", "Pure white background", "No shading", "High-contrast outlines", "Whimsical details"],
+            placeholder="Select styles to apply...")
 
-if 'blueprint_df' not in st.session_state:
-    st.session_state.blueprint_df = None
+# --- Logic & Processing ---
+if 'blueprint' not in st.session_state:
+    st.session_state.blueprint = None
 
 if st.button("Generate Book Blueprint"):
-    if not topic or not style_presets:
-        st.error("Please enter a topic and select at least one style.")
+    if not topic or not styles:
+        st.warning("Please provide a Topic and at least one Style.")
     else:
-        data = []
-        is_junior = "6-9" in age_group
+        rows = []
         for i in range(1, page_count + 1):
-            orientation = "Portrait" if i % 2 != 0 else "Landscape"
-            data.append({
+            rows.append({
                 "Page Number": i,
-                "Header Content": generate_header(i, topic, is_junior),
-                "Orientation": orientation,
+                "Header Content": f"{get_dynamic_header(i, topic, age_group)} [Designed by The LearnAi]",
+                "Orientation": "Portrait" if i % 2 != 0 else "Landscape",
                 "Branding": "Designed by The LearnAi"
             })
-        st.session_state.blueprint_df = pd.DataFrame(data)
+        st.session_state.blueprint = pd.DataFrame(rows)
 
-if st.session_state.blueprint_df is not None:
+if st.session_state.blueprint is not None:
+    st.subheader("Interactive Blueprint Editor")
+    # Editable table for orientation
     final_df = st.data_editor(
-        st.session_state.blueprint_df,
-        column_config={"Orientation": st.column_config.SelectboxColumn("Orientation", options=["Portrait", "Landscape"])},
-        use_container_width=True,
-        key="editor"
+        st.session_state.blueprint,
+        column_config={
+            "Orientation": st.column_config.SelectboxColumn("Orientation", options=["Portrait", "Landscape"])
+        },
+        use_container_width=True
     )
-    
+
     st.markdown("---")
-    gen_prompts = st.radio("Generate visual/image prompts?", ("No", "Yes"))
+    show_prompts = st.radio("Would you like to generate visual/image prompts?", ["No", "Yes"], horizontal=True)
 
-    if gen_prompts == "Yes":
+    if show_prompts == "Yes":
         all_prompts = []
+        style_str = ", ".join(styles)
+        
         for _, row in final_df.iterrows():
-            p_text = generate_visual_prompt(row, style_presets, topic)
-            all_prompts.append(p_text)
-            st.text_area(f"Page {row['Page Number']}", p_text, height=200)
+            prompt = (
+                f"Page {row['Page Number']}:\n"
+                f"Create a high-resolution, printable children's coloring page in {row['Orientation']} "
+                f"orientation (8.5 x 11 inches).\n\n"
+                f"Subject: {topic} - {row['Orientation']} composition. {row['Header Content']}\n\n"
+                f"Style: {style_str}\n\n"
+                f"Footer Branding: {row['Branding']}"
+            )
+            all_prompts.append(prompt)
+            st.text_area(f"Visual Prompt for Page {row['Page Number']}", prompt, height=200)
 
-        # --- Export Options ---
-        st.subheader("📥 Export All Prompts")
-        export_col1, export_col2, export_col3 = st.columns(3)
-        
-        # 1. CSV
-        csv = "\n\n".join(all_prompts).encode('utf-8')
-        export_col1.download_button("Download CSV", data=csv, file_name="prompts.csv")
-        
-        # 2. Word (.docx)
+        # --- Export Features ---
+        st.markdown("### 📥 Download Prompts")
+        ec1, ec2, ec3 = st.columns(3)
+
+        # Word Export
         doc = Document()
-        doc.add_heading(f"Coloring Book Prompts: {topic}", 0)
+        doc.add_heading(f"Coloring Book Blueprint: {topic}", 0)
         for p in all_prompts:
             doc.add_paragraph(p)
             doc.add_page_break()
-        bio = BytesIO()
-        doc.save(bio)
-        export_col2.download_button("Download Word", data=bio.getvalue(), file_name="prompts.docx")
-        
-        # 3. Excel
-        df_prompts = pd.DataFrame({"Prompts": all_prompts})
-        buffer = BytesIO()
-        with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
-            df_prompts.to_excel(writer, index=False)
-        export_col3.download_button("Download Excel", data=buffer.getvalue(), file_name="prompts.xlsx")
+        word_io = BytesIO()
+        doc.save(word_io)
+        ec1.download_button("Download Word (.docx)", data=word_io.getvalue(), file_name="prompts.docx")
+
+        # CSV Export
+        csv_data = "\n\n---\n\n".join(all_prompts)
+        ec2.download_button("Download CSV", data=csv_data, file_name="prompts.csv")
+
+        # Excel Export
+        xl_io = BytesIO()
+        with pd.ExcelWriter(xl_io, engine='openpyxl') as writer:
+            pd.DataFrame({"Prompts": all_prompts}).to_excel(writer, index=False)
+        ec3.download_button("Download Excel (.xlsx)", data=xl_io.getvalue(), file_name="prompts.xlsx")
