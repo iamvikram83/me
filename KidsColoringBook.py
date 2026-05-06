@@ -5,12 +5,16 @@ import google.generativeai as genai
 # --- 1. PAGE CONFIGURATION & STYLING ---
 st.set_page_config(page_title="LearnAi Architect", layout="wide")
 
+# Custom CSS for theme and security
 st.markdown("""
     <style>
+    /* Set the specific blue background from your design */
     [data-testid="stAppViewContainer"] { background-color: #006994; }
+    
+    /* Ensure all text elements are white for contrast */
     .stMarkdown, p, h1, h2, h3, span, label { color: white !important; }
 
-    /* Remove the visibility toggle (eye icon) from the API Key field */
+    /* Security: Remove the visibility toggle (eye icon) from the API Key field */
     button[aria-label="Show password"],
     button[aria-label="Hide password"] {
         display: none !important;
@@ -19,13 +23,18 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 # --- 2. SESSION STATE DEFAULTS ---
+# Initializing keys to track progress and data across reruns
 if 'step' not in st.session_state:
     st.session_state.step = 1
 if 'connected' not in st.session_state:
     st.session_state.connected = False
 
-# --- 3. STEPPER (Native Streamlit — no HTML, no leakage) ---
+# --- 3. STEPPER (Native Streamlit — resolves HTML leakage) ---
 def render_stepper(current_step):
+    """
+    Uses native columns to display progress.
+    Avoids raw HTML strings which caused the previous rendering bug.
+    """
     steps = ["1 · Setup & Connection", "2 · Blueprint & Prompts", "3 · Done"]
     cols = st.columns(3)
     for i, (col, name) in enumerate(zip(cols, steps), 1):
@@ -56,6 +65,7 @@ if st.session_state.step == 1:
         st.markdown("---")
         st.subheader("Link Google AI Studio")
 
+        # type="password" masks the text, while CSS removes the eye icon
         api_input = st.text_input("Enter API Key", type="password")
 
         if st.button("Connect"):
@@ -69,9 +79,11 @@ if st.session_state.step == 1:
         if st.session_state.connected:
             if st.button("Next Step: Create Blueprint ➡️"):
                 if topic and age_group:
+                    # Save inputs to session state
                     st.session_state.topic = topic
                     st.session_state.age_group = age_group
                     st.session_state.style_list = style_list
+                    # Initialize the dataframe for Step 2
                     st.session_state.df = pd.DataFrame([
                         {"Page": i + 1, "Scene Description": "", "Prompt": ""}
                         for i in range(page_count)
@@ -90,6 +102,7 @@ elif st.session_state.step == 2:
     st.subheader("Finalize your Page Content")
     st.markdown(f"**Topic:** {st.session_state.get('topic', '')} &nbsp;|&nbsp; **Age Group:** {st.session_state.get('age_group', '')}")
 
+    # Use data_editor to allow user to input descriptions for each page
     edited_df = st.data_editor(
         st.session_state.df,
         use_container_width=True,
@@ -111,6 +124,7 @@ elif st.session_state.step == 3:
     st.dataframe(st.session_state.df, use_container_width=True, hide_index=True)
 
     if st.button("🔄 Start New Project"):
+        # Clear all session data to restart fresh
         for key in ['step', 'connected', 'topic', 'age_group', 'style_list', 'df', 'api_key']:
             if key in st.session_state:
                 del st.session_state[key]
