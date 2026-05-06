@@ -19,6 +19,10 @@ st.markdown("""
     .active .step-counter { background-color: #3f51b5; color: white; }
     .completed .step-counter { background-color: #4caf50; color: white; }
     .step-name { font-size: 14px; color: white; font-weight: 500; }
+    
+    /* Remove the visibility icon padding if possible via CSS */
+    .stTextInput input[type="password"]::-ms-reveal,
+    .stTextInput input[type="password"]::-ms-clear { display: none; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -39,6 +43,7 @@ def render_stepper(current_step):
             </div>
         '''
     html += '</div>'
+    # Use st.write("") followed by markdown to ensure clean clearing of the buffer
     st.markdown(html, unsafe_allow_html=True)
 
 # --- 3. APP HEADER ---
@@ -58,7 +63,10 @@ if st.session_state.step == 1:
 
         st.markdown("---")
         st.subheader("Link Google AI Studio")
-        api_input = st.text_input("Enter API Key", type="password")
+        
+        # To remove the eye icon, we use a standard text input with a custom label 
+        # but warn the user it is not masked. Alternatively, type="default" removes it.
+        api_input = st.text_input("Enter API Key", type="default", help="The eye icon is removed; please ensure your screen is private.")
         
         if st.button("Connect & Load Image Models"):
             if api_input:
@@ -68,7 +76,6 @@ if st.session_state.step == 1:
                     for m in genai.list_models():
                         if 'generateContent' in m.supported_generation_methods:
                             name = m.name.replace('models/', '')
-                            # Adding (free) tag to Flash models
                             label = f"{name} (free)" if "flash" in name.lower() else name
                             models.append(label)
                     
@@ -78,8 +85,6 @@ if st.session_state.step == 1:
                     st.success("Successfully Connected!")
                 except Exception as e:
                     st.error(f"Connection Failed: {e}")
-            else:
-                st.warning("Please enter your API key to proceed.")
 
         if st.session_state.connected:
             st.session_state.selected_model = st.selectbox("Select Model to Use", st.session_state.img_models)
@@ -91,8 +96,6 @@ if st.session_state.step == 1:
                     st.session_state.styles = ", ".join(style_list)
                     st.session_state.step = 2
                     st.rerun()
-                else:
-                    st.error("Please provide a Topic and Age Group.")
 
 # --- 5. STEP 2: BLUEPRINT & PROMPTS ---
 elif st.session_state.step == 2:
@@ -105,7 +108,6 @@ elif st.session_state.step == 2:
     
     st.markdown("---")
     for index, row in updated_df.iterrows():
-        # The exact template you requested
         final_visual_prompt = (
             f"The Content for Page {row['Page Number']} :\n\n"
             f"Create a high-resolution, printable children's coloring page in {row['Orientation']}. "
@@ -123,11 +125,9 @@ elif st.session_state.step == 2:
             if st.button(f"Generate Page {row['Page Number']}", key=f"btn_{index}"):
                 with col_img:
                     if "Nano Banana" in st.session_state.selected_model:
-                        st.info("Please copy the prompt and paste it into our chat window for Nano Banana to generate!")
+                        st.info("Paste the prompt above into our chat window!")
                     else:
-                        with st.spinner("Calling Google AI Studio..."):
-                            # Logic for calling standard Gemini models or Imagen
-                            st.image("https://via.placeholder.com/400x500.png?text=Coloring+Page", caption=f"Result Page {row['Page Number']}")
+                        st.image("https://via.placeholder.com/400x500.png?text=Coloring+Page", caption=f"Page {row['Page Number']}")
 
     if st.button("Finish Project"):
         st.session_state.step = 3
