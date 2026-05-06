@@ -35,11 +35,9 @@ def get_image_models(api_key):
             if 'image' in m.description.lower() or 'generate_image' in m.supported_generation_methods:
                 tier = " (Free Tier)" if "flash" in m.name.lower() else " (Paid Tier)"
                 available_models.append(f"{m.display_name}{tier}")
-        if not available_models:
-            return ["Imagen 3 (Paid Tier)", "Imagen 3 Fast (Free Tier)"]
-        return available_models
+        return available_models if available_models else ["Imagen 3 (Paid Tier)"]
     except Exception:
-        return ["Error loading models - Check API Key"]
+        return ["Error loading models"]
 
 # --- 5. APP HEADER ---
 st.markdown("<h1 style='text-align: center;'>🎨 The LearnAi: Coloring Book Architect</h1>", unsafe_allow_html=True)
@@ -89,9 +87,9 @@ if st.session_state.step == 1:
                 st.session_state.style_tags = ", ".join(style_list)
                 st.session_state.want_ai = want_ai
                 
-                # FIXED: Unique Initialization
+                # FIXED: Ensure each row is unique upon creation
                 st.session_state.df = pd.DataFrame([
-                    {"Page": i + 1, "Scene Description": f"Specific scene for {topic} - Part {i+1}", "Prompt": ""}
+                    {"Page": i + 1, "Scene Description": f"Specific scene {i+1} for {topic}", "Prompt": ""}
                     for i in range(page_count)
                 ])
                 st.session_state.step = 2
@@ -107,18 +105,17 @@ elif st.session_state.step == 2:
 
     st.subheader("Finalize your Page Content")
     
-    # RENDER DATA EDITOR FIRST
+    # RENDER DATA EDITOR
     edited_df = st.data_editor(st.session_state.df, use_container_width=True, hide_index=True)
-    
-    # FIXED: Update Session State and generate unique prompts AFTER edit
     st.session_state.df = edited_df
+
+    # FIXED: Update Prompts based on unique Scene Descriptions AFTER edit
     for index, row in st.session_state.df.iterrows():
-        unique_prompt = (
-            f"Coloring book page for {st.session_state.get('age_group')}. "
-            f"Subject: {row['Scene Description']}. Style: {st.session_state.get('style_tags')}. "
-            "Minimal details, high contrast."
+        st.session_state.df.at[index, 'Prompt'] = (
+            f"Coloring book page for {st.session_state.age_group}. "
+            f"Subject: {row['Scene Description']}. Style: {st.session_state.style_tags}. "
+            "Clean black and white line art."
         )
-        st.session_state.df.at[index, 'Prompt'] = unique_prompt
 
     st.download_button("📥 Download All Page Prompts", 
                        data=st.session_state.df.to_csv(index=False).encode('utf-8'), 
@@ -127,13 +124,13 @@ elif st.session_state.step == 2:
     st.markdown("---")
     st.subheader("Visual Prompt Summary")
     
-    # Display unique prompts in expanders
+    # Display individual unique prompts
     for index, row in st.session_state.df.iterrows():
         with st.expander(f"Page {row['Page']} - {row['Scene Description']}"):
             st.code(row['Prompt'], language="text")
             if st.session_state.get('want_ai') == "Yes" and st.session_state.connected:
                 if st.button(f"Generate Image for Page {row['Page']}", key=f"btn_{index}"):
-                    st.write(f"⏳ Generating unique image using: {st.session_state.get('gen_model')}")
+                    st.write(f"⏳ Generating unique image for: {row['Scene Description']}...")
 
     if st.button("Finish Project ✅"):
         st.session_state.step = 3
