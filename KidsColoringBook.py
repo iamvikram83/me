@@ -9,6 +9,7 @@ st.markdown("""
     <style>
     [data-testid="stAppViewContainer"] { background-color: #006994; }
     .stMarkdown, p, h1, h2, h3, span, label { color: white !important; }
+    /* Hide password toggle for API security */
     button[aria-label="Show password"], button[aria-label="Hide password"] { display: none !important; }
     </style>
     """, unsafe_allow_html=True)
@@ -17,7 +18,7 @@ st.markdown("""
 if 'step' not in st.session_state: st.session_state.step = 1
 if 'connected' not in st.session_state: st.session_state.connected = False
 
-# --- 3. STEPPER (Native Streamlit) ---
+# --- 3. STEPPER ---
 def render_stepper(current_step):
     steps = ["1 · Setup & Connection", "2 · Blueprint & Prompts", "3 · Done"]
     cols = st.columns(3)
@@ -53,7 +54,11 @@ if st.session_state.step == 1:
             page_count = st.number_input("Total Pages", min_value=1, value=st.session_state.get('page_count', 1))
         with c2:
             age_group = st.selectbox("Age Group", options=["3-5 years", "6-9 years"], index=0)
-            style_list = st.multiselect("Selected Styles", ["Bold black lines", "No shading", "White background"], default=["Bold black lines"])
+            # Defaulting to empty as requested
+            style_list = st.multiselect("Selected Styles", 
+                                        options=["Bold black lines", "No shading", "White background", "High Contrast"],
+                                        default=[], 
+                                        placeholder="Please select styles...")
 
         st.markdown("---")
         st.subheader("Image Generation Preferences")
@@ -80,22 +85,31 @@ if st.session_state.step == 1:
             st.session_state.gen_model = "Manual Mode"
 
         if st.button("Next Step: Create Blueprint ➡️"):
-            if topic:
+            if topic and style_list:
                 st.session_state.topic = topic
                 st.session_state.page_count = page_count
                 st.session_state.age_group = age_group
                 st.session_state.style_tags = ", ".join(style_list)
                 st.session_state.want_ai = want_ai
                 
-                # FIXED: Ensure each row is unique upon creation
+                # INITIALIZING UNIQUE CONTENT
+                headers = ["Cover", "Introduction", "Core Scene", "Action Scene", "Detail Scene", "Climax", "Conclusion"]
                 st.session_state.df = pd.DataFrame([
-                    {"Page": i + 1, "Scene Description": f"Specific scene {i+1} for {topic}", "Prompt": ""}
+                    {
+                        "Page": i + 1, 
+                        "Header": headers[i] if i < len(headers) else f"Page {i+1} Scene",
+                        "Orientation": "Portrait",
+                        "Scene Description": f"Unique illustration of {topic}", 
+                        "Prompt": ""
+                    }
                     for i in range(page_count)
                 ])
                 st.session_state.step = 2
                 st.rerun()
+            elif not style_list:
+                st.warning("⚠️ Please select at least one style.")
             else:
-                st.warning("Please enter a Book Topic.")
+                st.warning("⚠️ Please enter a Book Topic.")
 
 # --- 7. STEP 2: BLUEPRINT & PROMPTS ---
 elif st.session_state.step == 2:
@@ -105,32 +119,41 @@ elif st.session_state.step == 2:
 
     st.subheader("Finalize your Page Content")
     
-    # RENDER DATA EDITOR
-    edited_df = st.data_editor(st.session_state.df, use_container_width=True, hide_index=True)
+    # DATA EDITOR WITH HORIZONTAL SCROLL
+    # column_config ensures columns have enough width to trigger scrolling
+    edited_df = st.data_editor(
+        st.session_state.df,
+        use_container_width=True, 
+        hide_index=True,
+        column_config={
+            "Orientation": st.column_config.SelectboxColumn("Orientation", options=["Portrait", "Landscape"], width="medium"),
+            "Header": st.column_config.TextColumn("Header", width="medium"),
+            "Scene Description": st.column_config.TextColumn("Scene Description", width="large"),
+            "Prompt": st.column_config.TextColumn("Generated Prompt", width="large", disabled=True)
+        }
+    )
     st.session_state.df = edited_df
 
-    # FIXED: Update Prompts based on unique Scene Descriptions AFTER edit
+    # SYNC LOGIC: Maintain uniqueness across all fields
     for index, row in st.session_state.df.iterrows():
         st.session_state.df.at[index, 'Prompt'] = (
-            f"Coloring book page for {st.session_state.age_group}. "
-            f"Subject: {row['Scene Description']}. Style: {st.session_state.style_tags}. "
-            "Clean black and white line art."
+            f"Coloring book page ({row['Orientation']}). Subject: {row['Header']} - {row['Scene Description']}. "
+            f"Target Age: {st.session_state.age_group}. Styles: {st.session_state.style_tags}."
         )
 
     st.download_button("📥 Download All Page Prompts", 
                        data=st.session_state.df.to_csv(index=False).encode('utf-8'), 
-                       file_name="blueprint.csv", mime="text/csv")
+                       file_name="coloring_book_blueprint.csv", mime="text/csv")
 
     st.markdown("---")
     st.subheader("Visual Prompt Summary")
     
-    # Display individual unique prompts
     for index, row in st.session_state.df.iterrows():
-        with st.expander(f"Page {row['Page']} - {row['Scene Description']}"):
+        with st.expander(f"Page {row['Page']}: {row['Header']} ({row['Orientation']})"):
             st.code(row['Prompt'], language="text")
             if st.session_state.get('want_ai') == "Yes" and st.session_state.connected:
-                if st.button(f"Generate Image for Page {row['Page']}", key=f"btn_{index}"):
-                    st.write(f"⏳ Generating unique image for: {row['Scene Description']}...")
+                if st.button(f"Generate Image for {row['Header']}", key=f"btn_{index}"):
+                    st.write(f"⏳ Calling {st.session_state.get('gen_model')}...")
 
     if st.button("Finish Project ✅"):
         st.session_state.step = 3
