@@ -89,9 +89,9 @@ if st.session_state.step == 1:
                 st.session_state.style_tags = ", ".join(style_list)
                 st.session_state.want_ai = want_ai
                 
-                # RE-ESTABLISHING BLUEPRINT LOGIC
+                # FIXED: Unique Initialization
                 st.session_state.df = pd.DataFrame([
-                    {"Page": i + 1, "Scene Description": f"Scene for {topic}", "Prompt": ""}
+                    {"Page": i + 1, "Scene Description": f"Specific scene for {topic} - Part {i+1}", "Prompt": ""}
                     for i in range(page_count)
                 ])
                 st.session_state.step = 2
@@ -107,17 +107,18 @@ elif st.session_state.step == 2:
 
     st.subheader("Finalize your Page Content")
     
-    # Logic to dynamically update Prompts based on Scene Descriptions
-    for index, row in st.session_state.df.iterrows():
-        scene = row['Scene Description']
-        st.session_state.df.at[index, 'Prompt'] = (
-            f"Coloring book page for {st.session_state.age_group} kids. "
-            f"Subject: {scene}. Style: {st.session_state.style_tags}. "
-            "Clean black and white line art."
-        )
-
+    # RENDER DATA EDITOR FIRST
     edited_df = st.data_editor(st.session_state.df, use_container_width=True, hide_index=True)
+    
+    # FIXED: Update Session State and generate unique prompts AFTER edit
     st.session_state.df = edited_df
+    for index, row in st.session_state.df.iterrows():
+        unique_prompt = (
+            f"Coloring book page for {st.session_state.get('age_group')}. "
+            f"Subject: {row['Scene Description']}. Style: {st.session_state.get('style_tags')}. "
+            "Minimal details, high contrast."
+        )
+        st.session_state.df.at[index, 'Prompt'] = unique_prompt
 
     st.download_button("📥 Download All Page Prompts", 
                        data=st.session_state.df.to_csv(index=False).encode('utf-8'), 
@@ -126,12 +127,13 @@ elif st.session_state.step == 2:
     st.markdown("---")
     st.subheader("Visual Prompt Summary")
     
+    # Display unique prompts in expanders
     for index, row in st.session_state.df.iterrows():
-        with st.expander(f"Page {row['Page']} Details"):
+        with st.expander(f"Page {row['Page']} - {row['Scene Description']}"):
             st.code(row['Prompt'], language="text")
             if st.session_state.get('want_ai') == "Yes" and st.session_state.connected:
                 if st.button(f"Generate Image for Page {row['Page']}", key=f"btn_{index}"):
-                    st.write(f"⏳ Calling {st.session_state.get('gen_model')}...")
+                    st.write(f"⏳ Generating unique image using: {st.session_state.get('gen_model')}")
 
     if st.button("Finish Project ✅"):
         st.session_state.step = 3
