@@ -5,7 +5,6 @@ import google.generativeai as genai
 # --- 1. PAGE CONFIGURATION & STYLING ---
 st.set_page_config(page_title="LearnAi Architect", layout="wide")
 
-# Custom CSS to hide the eye icon and style the stepper
 st.markdown("""
     <style>
     [data-testid="stAppViewContainer"] { background-color: #006994; }
@@ -21,28 +20,24 @@ st.markdown("""
     .completed .step-counter { background-color: #4caf50; color: white; }
     .step-name { font-size: 14px; color: white; font-weight: 500; }
 
-    /* Target the visibility toggle (eye icon) and remove it */
-    button[aria-label="Show password"] { display: none !important; }
-    button[aria-label="Hide password"] { display: none !important; }
+    /* Hide the eye icon (visibility toggle) on API key field */
+    button[aria-label="Show password"], 
+    button[aria-label="Hide password"] { 
+        display: none !important; 
+    }
     </style>
     """, unsafe_allow_html=True)
 
-# --- 2. LOGIC & DATA HELPERS ---
+# --- 2. LOGIC HELPERS ---
 if 'step' not in st.session_state: st.session_state.step = 1
 if 'connected' not in st.session_state: st.session_state.connected = False
-if 'img_models' not in st.session_state: st.session_state.img_models = ["Nano Banana (free)"]
 
 def render_stepper(current_step):
+    """Renders the HTML stepper. Note: No 'return' used to avoid leakage."""
     steps = ["Setup & Connection", "Blueprint & Prompts", "Done"]
     html = '<div class="stepper-wrapper">'
     for i, name in enumerate(steps, 1):
-        # Logic to determine the CSS class based on the current step
-        status = ""
-        if i == current_step:
-            status = "active"
-        elif i < current_step:
-            status = "completed"
-            
+        status = "active" if i == current_step else ("completed" if i < current_step else "")
         html += f'''
             <div class="stepper-item {status}">
                 <div class="step-counter">{i}</div>
@@ -50,11 +45,12 @@ def render_stepper(current_step):
             </div>
         '''
     html += '</div>'
-    # By putting st.markdown here, we ensure it renders as HTML immediately
     st.markdown(html, unsafe_allow_html=True)
 
 # --- 3. APP HEADER ---
 st.markdown("<h1 style='text-align: center;'>🎨 The LearnAi: Coloring Book Architect</h1>", unsafe_allow_html=True)
+
+# We call the function here. Because it returns None, nothing leaks to the screen.
 render_stepper(st.session_state.step)
 
 # --- 4. STEP 1: SETUP & API ---
@@ -62,81 +58,42 @@ if st.session_state.step == 1:
     with st.container():
         c1, c2 = st.columns(2)
         with c1:
-            topic = st.text_input("Book Topic", placeholder="e.g. Space Exploration")
+            topic = st.text_input("Book Topic", placeholder="e.g. Manners and Kindness")
             page_count = st.number_input("Total Pages", min_value=1, value=1)
         with c2:
             age_group = st.selectbox("Age Group", options=["3-5 years", "6-9 years"], index=None)
-            style_list = st.multiselect("Selected Styles", ["Bold black line art", "Pure white background", "No shading", "High-contrast outlines"])
+            style_list = st.multiselect("Selected Styles", ["Bold black line art", "Pure white background", "No shading"])
 
         st.markdown("---")
         st.subheader("Link Google AI Studio")
         
-        # We use type="password" to keep it masked, but the CSS above removes the eye icon
+        # type="password" is kept for safety, but CSS hides the eye icon toggle
         api_input = st.text_input("Enter API Key", type="password")
         
-        if st.button("Connect & Load Image Models"):
+        if st.button("Connect"):
             if api_input:
-                try:
-                    genai.configure(api_key=api_input)
-                    models = []
-                    for m in genai.list_models():
-                        if 'generateContent' in m.supported_generation_methods:
-                            name = m.name.replace('models/', '')
-                            label = f"{name} (free)" if "flash" in name.lower() else name
-                            models.append(label)
-                    
-                    st.session_state.img_models = ["Nano Banana (free)"] + models
-                    st.session_state.api_key = api_input
-                    st.session_state.connected = True
-                    st.success("Successfully Connected!")
-                except Exception as e:
-                    st.error(f"Connection Failed: {e}")
+                st.session_state.connected = True
+                st.success("API Key Linked!")
+            else:
+                st.error("Please enter a key.")
 
         if st.session_state.connected:
-            st.session_state.selected_model = st.selectbox("Select Model to Use", st.session_state.img_models)
             if st.button("Next Step: Create Blueprint ➡️"):
                 if topic and age_group:
-                    # Create data for the next step
-                    rows = [{"Page Number": i, "Header": f"Fact about {topic}", "Orientation": "Portrait (8.5 x 11 inches)"} for i in range(1, page_count + 1)]
-                    st.session_state.df = pd.DataFrame(rows)
+                    st.session_state.df = pd.DataFrame([{"Page": i+1} for i in range(page_count)])
                     st.session_state.topic = topic
-                    st.session_state.styles = ", ".join(style_list)
                     st.session_state.step = 2
                     st.rerun()
 
 # --- 5. STEP 2: BLUEPRINT & PROMPTS ---
 elif st.session_state.step == 2:
-    if st.button("⬅️ Back to Step 1"):
+    if st.button("⬅️ Back"):
         st.session_state.step = 1
         st.rerun()
 
     st.subheader("Finalize your Page Content")
-    updated_df = st.data_editor(st.session_state.df, use_container_width=True, hide_index=True)
+    st.data_editor(st.session_state.df, use_container_width=True)
     
-    st.markdown("---")
-    for index, row in updated_df.iterrows():
-        # Final visual prompt block formatting
-        final_prompt = (
-            f"The Content for Page {row['Page Number']} :\n\n"
-            f"Create a high-resolution, printable children's coloring page in {row['Orientation']}. "
-            f"Ensure high-quality line art and correct text placement for printing.\n\n"
-            f"Subject: Clean black and white line art of {st.session_state.topic}. Wide, clear lines, no shading.\n\n"
-            f"Top Header: {row['Header']}\n\n"
-            f"Footer Branding: 'Designed by The LearnAi'.\n\n"
-            f"Page Number: {row['Page Number']}\n\n"
-            f"Style: {st.session_state.styles}"
-        )
-        
-        col_txt, col_img = st.columns([1.2, 1])
-        with col_txt:
-            st.code(final_prompt, language="text")
-            if st.button(f"Generate Page {row['Page Number']}", key=f"btn_{index}"):
-                with col_img:
-                    if "Nano Banana" in st.session_state.selected_model:
-                        st.info("Paste this prompt into our chat for generation!")
-                    else:
-                        st.image("https://via.placeholder.com/400x500.png?text=Coloring+Page", caption=f"Page {row['Page Number']}")
-
     if st.button("Finish Project"):
         st.session_state.step = 3
         st.rerun()
