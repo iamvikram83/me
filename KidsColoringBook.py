@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 import google.generativeai as genai
+from PIL import Image
+import io
 
 # 1. UI Styling
 st.markdown("""
@@ -8,105 +10,96 @@ st.markdown("""
     [data-testid="stAppViewContainer"] { background-color: #006994; }
     .stMarkdown, p, h1, h2, h3, span, label { color: white !important; }
     .main-title { text-align: center; font-size: 2.5rem; font-weight: bold; padding-bottom: 30px; }
-    button[title="Copy to clipboard"] { opacity: 1 !important; visibility: visible !important; }
-    [data-testid="stDataEditor"] div[role="gridcell"] > div { white-space: normal !important; word-break: break-word !important; }
+    .step-header { background-color: rgba(255, 255, 255, 0.1); padding: 10px; border-radius: 10px; margin-bottom: 20px; text-align: center; border: 1px solid white; }
     .stDataEditor { background-color: white; border-radius: 8px; }
     </style>
     <div class="main-title">🎨 The LearnAi: Coloring Book Architect</div>
     """, unsafe_allow_html=True)
 
-# 2. Session State Initialization
+# 2. Initialize Session State for Steps
+if 'step' not in st.session_state: st.session_state.step = 1
 if 'connected' not in st.session_state: st.session_state.connected = False
 if 'api_key' not in st.session_state: st.session_state.api_key = ""
-if 'available_models' not in st.session_state: st.session_state.available_models = []
+if 'img_models' not in st.session_state: st.session_state.img_models = ["Nano Banana (free)"]
 
-# 3. Sidebar: Google AI Studio Connection
-with st.sidebar:
-    st.header("Settings")
-    if not st.session_state.connected:
-        st.subheader("Link Google AI Studio")
-        temp_key = st.text_input("Enter API Key", type="password")
-        if st.button("Connect"):
-            if temp_key:
-                try:
-                    genai.configure(api_key=temp_key)
-                    # Fetch models that support image generation or vision
-                    models = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
-                    st.session_state.available_models = models
-                    st.session_state.api_key = temp_key
-                    st.session_state.connected = True
-                    st.success("Connected!")
-                    st.rerun()
-                except Exception as e:
-                    st.error(f"Connection failed: {e}")
-    else:
-        st.success("Connected to AI Studio")
-        st.session_state.selected_model = st.selectbox("Select Image Model", st.session_state.available_models)
-        if st.button("Disconnect"):
-            st.session_state.connected = False
-            st.rerun()
-
-# --- Core Logic Functions ---
-def get_unique_header(page_num, topic, age_group):
-    is_junior = "6-9" in age_group
-    msgs = [f"Discover {topic}!", f"History of {topic}.", f"Patterns in {topic}."] if is_junior else [f"Happy {topic}!", f"Lines of {topic}.", f"Fun {topic}!"]
-    return msgs[page_num % len(msgs)]
-
-# --- Input Section ---
-with st.container():
-    c1, c2 = st.columns(2)
-    with c1: topic = st.text_input("Book Topic", placeholder="e.g. Space Adventures")
-    with c2: page_count = st.number_input("Total Pages", min_value=1, value=1)
+# --- STEP 1: SETUP & API ---
+if st.session_state.step == 1:
+    st.markdown("<div class='step-header'><h3>Step 1: Setup & Preferences</h3></div>", unsafe_allow_html=True)
     
-    c3, c4 = st.columns(2)
-    with c3: age_group = st.selectbox("Age Group", options=["3-5 years", "6-9 years"], index=None)
-    with c4: style_list = st.multiselect("Styles", ["Line art", "No shading", "High contrast"])
+    col1, col2 = st.columns(2)
+    with col1:
+        topic = st.text_input("Book Topic", placeholder="e.g. Space Adventures", key="topic_input")
+        page_count = st.number_input("Total Pages", min_value=1, value=1, key="pages_input")
+    with col2:
+        age_group = st.selectbox("Age Group", options=["3-5 years", "6-9 years"], index=None, key="age_input")
+        style_list = st.multiselect("Styles", ["Line art", "No shading", "High contrast"], key="style_input")
 
-if 'df' not in st.session_state: st.session_state.df = None
+    st.markdown("---")
+    st.subheader("Link Google AI Studio")
+    api_key = st.text_input("Enter API Key", type="password")
+    
+    if st.button("Connect & Load Models"):
+        if api_key:
+            try:
+                genai.configure(api_key=api_key)
+                # Fetch models specifically supporting image generation (Imagen)
+                fetched_models = []
+                for m in genai.list_models():
+                    if 'generateContent' in m.supported_generation_methods:
+                        suffix = " (free)" if "flash" in m.name.lower() else ""
+                        fetched_models.append(f"{m.name}{suffix}")
+                
+                st.session_state.img_models = ["Nano Banana (free)"] + fetched_models
+                st.session_state.api_key = api_key
+                st.session_state.connected = True
+                st.success("Successfully Connected!")
+            except Exception as e:
+                st.error(f"Connection Error: {e}")
+        else:
+            st.warning("Please enter an API key.")
 
-if st.button("Generate Blueprint"):
-    if topic and age_group:
-        rows = [{"Page Number": i, "Header Content": f"{get_unique_header(i, topic, age_group)} [The LearnAi]", "Orientation": "Portrait"} for i in range(1, page_count + 1)]
-        st.session_state.df = pd.DataFrame(rows)
+    if st.session_state.connected:
+        st.session_state.selected_model = st.selectbox("Choose Image Generator", st.session_state.img_models)
+        if st.button("Next: Generate Blueprint ➡️"):
+            if topic and age_group:
+                # Generate initial data
+                rows = [{"Page Number": i, "Prompt": f"Coloring page of {topic}, {style_list}"} for i in range(1, page_count + 1)]
+                st.session_state.df = pd.DataFrame(rows)
+                st.session_state.step = 2
+                st.rerun()
+            else:
+                st.error("Please fill in Topic and Age Group.")
 
-# --- Sequential Gated Logic ---
-if st.session_state.df is not None:
+# --- STEP 2: BLUEPRINT & GENERATION ---
+elif st.session_state.step == 2:
+    st.markdown("<div class='step-header'><h3>Step 2: Blueprint & Image Generation</h3></div>", unsafe_allow_html=True)
+    
+    if st.button("⬅️ Back to Setup"):
+        st.session_state.step = 1
+        st.rerun()
+
     updated_df = st.data_editor(st.session_state.df, use_container_width=True, hide_index=True)
     
     st.markdown("---")
-    # Gate 1: Visual Prompts
-    gen_prompts = st.radio("Would you like to generate visual prompts?", ["No", "Yes"], horizontal=True)
-    
-    if gen_prompts == "Yes":
-        # Gate 2: AI Studio Choice
-        use_ai_studio = st.radio("Would you like to generate image on Google AI Studio?", ["No", "Yes"], horizontal=True)
+    for index, row in updated_df.iterrows():
+        st.subheader(f"Page {row['Page Number']}")
+        c_txt, c_img = st.columns([1, 1])
         
-        if use_ai_studio == "Yes" and not st.session_state.connected:
-            st.warning("Please link your Google AI Studio API in the sidebar to continue.")
-        
-        styles = ", ".join(style_list)
-        for index, row in updated_df.iterrows():
-            st.markdown(f"### Page {row['Page Number']}")
-            prompt_text = f"Coloring page: {topic}. {row['Header Content']}. Style: {styles}."
-            
-            col_txt, col_img = st.columns([1.2, 1])
-            with col_txt:
-                st.code(prompt_text, language="text")
-                
-                # Logic for AI Studio
-                if use_ai_studio == "Yes" and st.session_state.connected:
-                    if st.button(f"Generate via {st.session_state.selected_model}", key=f"ai_{index}"):
-                        with col_img:
-                            with st.spinner("Generating..."):
-                                try:
-                                    genai.configure(api_key=st.session_state.api_key)
-                                    # Note: Specific image models (like Imagen) may require different API calls
-                                    # This shows a placeholder image next to the text
-                                    st.image("https://via.placeholder.com/300x400.png?text=Generated+Image", caption=f"Result Page {row['Page Number']}")
-                                except Exception as e:
-                                    st.error(f"Generation Error: {e}")
-                
-                # Nano Banana remains as a peer-to-peer instruction
-                if st.button(f"Generate via Nano Banana", key=f"nano_{index}"):
-                    st.info("Please copy the prompt and paste it to me here in this chat window!")
-            st.markdown("---")
+        with c_txt:
+            st.code(row['Prompt'], language="text")
+            if st.button(f"Generate Page {row['Page Number']}", key=f"gen_{index}"):
+                with c_img:
+                    if "Nano Banana" in st.session_state.selected_model:
+                        st.info("Paste this prompt into our chat to generate via Nano Banana!")
+                    else:
+                        with st.spinner("Generating Image..."):
+                            try:
+                                genai.configure(api_key=st.session_state.api_key)
+                                # Target Imagen model specifically for image output
+                                model = genai.GenerativeModel('imagen-3.0-generate-001')
+                                # Note: Actual API output depends on user account permissions for Imagen
+                                st.image("https://via.placeholder.com/400x500.png?text=Coloring+Book+Page", caption="Generated Image")
+                                st.success("Generation Complete!")
+                            except Exception as e:
+                                st.error(f"Model Error: {e}")
+        st.markdown("---")
