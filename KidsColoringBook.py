@@ -3,62 +3,97 @@ import pandas as pd
 from io import BytesIO
 from docx import Document
 
-# ... (Keep your UI Styling CSS here) ...
+# --- 1. UI Styling ---
+st.set_page_config(page_title="Coloring Book Architect", layout="wide")
 
+st.markdown("""
+    <style>
+    [data-testid="stAppViewContainer"] { background-color: #006994; }
+    .stMarkdown, p, h1, h2, h3, span, label { color: white !important; }
+    .main-title { text-align: center; font-size: 2.5rem; font-weight: bold; padding-bottom: 30px; }
+    .stDataEditor { background-color: white; border-radius: 8px; }
+    </style>
+    <div class="main-title">🎨 The LearnAi: Coloring Book Architect</div>
+    """, unsafe_allow_html=True)
+
+# --- 2. THE FIX: Guaranteed Unique Content Generator ---
 def get_unique_header(page_num, topic, age_group):
-    """
-    Generates a unique string for every page by incorporating 
-    the page number directly into the text.
-    """
-    is_junior = "6-9" in age_group
+    # Determine the vibe based on age
+    is_junior = "6-9" in str(age_group)
     
-    # 1. Create a pool of varied sentence starters
+    # We use dynamic descriptors to ensure Page 1 and Page 100 are different
     if is_junior:
-        starters = [
-            f"On this page {page_num}, explore the scientific details of {topic}.",
-            f"This is scene number {page_num}: focus on the historical side of {topic}.",
-            f"For page {page_num}, visualize a technical blueprint of {topic}.",
-            f"In this {page_num}th illustration, imagine {topic} in a new world.",
-            f"Detail number {page_num} involves looking closely at {topic}'s structure."
-        ]
+        instruction = f"Detailed Activity {page_num}: Study and color the complex patterns of {topic}."
+        tip = f"Tip: Use professional shading for this {topic} scene."
     else:
-        starters = [
-            f"Here is a big {topic} for page {page_num}! Color it bright.",
-            f"Page {page_num} shows a friendly {topic}. Use your favorite color.",
-            f"Can you find the hidden shapes in this {topic} on page {page_num}?",
-            f"Let's color this {topic} together for page {page_num}!",
-            f"Look at how happy this {topic} is on page {page_num}!"
-        ]
-    
-    # 2. Add a unique secondary instruction based on page number to ensure 100% uniqueness
-    # Even if the starter repeats, the 'Bonus Task' will be unique because it uses the number
-    bonus_tasks = [
-        f"Draw {page_num} small stars in the background.",
-        f"Use at least {page_num + 1} different colors here.",
-        f"Circle the biggest part of the {topic} on this page.",
-        f"Add a unique pattern to the corner of page {page_num}.",
-        f"Sign your name at the bottom of this {page_num}th page."
-    ]
-    
-    main_msg = starters[page_num % len(starters)]
-    extra_task = bonus_tasks[page_num % len(bonus_tasks)]
-    
-    return f"{main_msg} {extra_task}"
+        instruction = f"Fun Page {page_num}: Color the big, happy {topic}!"
+        tip = f"Challenge: Can you add {page_num} tiny dots inside the {topic}?"
 
-# --- Logic for the Generate Button ---
+    return f"{instruction} {tip}"
+
+# --- 3. Input Section ---
+with st.container():
+    col1, col2 = st.columns(2)
+    with col1:
+        topic = st.text_input("Book Topic", value="Space Adventures")
+    with col2:
+        page_count = st.number_input("Total Pages", min_value=1, value=10)
+    
+    col3, col4 = st.columns(2)
+    with col3:
+        age_group = st.selectbox("Age Group", options=["3-5 years (Explorer)", "6-9 years (Junior Creator)"], index=0)
+    with col4:
+        style_list = st.multiselect("Styles", 
+            ["Bold black line art", "Pure white background", "No shading"],
+            default=["Bold black line art"])
+
+# Initialize session state
+if 'df' not in st.session_state:
+    st.session_state.df = None
+
+# --- 4. Generation Logic ---
 if st.button("Generate Blueprint"):
-    if not topic or not style_list or age_group is None:
-        st.error("Please fill in all fields.")
+    if not topic:
+        st.error("Please enter a topic.")
     else:
-        rows = []
-        for i in range(1, page_count + 1):
-            # i is the page number passed to the function
-            unique_text = get_unique_header(i, topic, age_group)
-            rows.append({
-                "Page Number": i,
-                "Header Content": f"{unique_text} [Designed by The LearnAi]",
-                "Orientation": "Portrait" if i % 2 != 0 else "Landscape"
-            })
-        st.session_state.df = pd.DataFrame(rows)
+        try:
+            rows = []
+            for i in range(1, page_count + 1):
+                # We pass 'i' to the function to ensure the text contains the actual page number
+                unique_text = get_unique_header(i, topic, age_group)
+                
+                rows.append({
+                    "Page Number": i,
+                    "Header Content": f"{unique_text} [Designed by The LearnAi]",
+                    "Orientation": "Portrait" if i % 2 != 0 else "Landscape"
+                })
+            st.session_state.df = pd.DataFrame(rows)
+            st.rerun() # Forces the UI to show the new data immediately
+        except Exception as e:
+            st.error(f"Logic Error: {e}")
 
-# ... (Keep the rest of your Display and Export Section) ...
+# --- 5. Display & Export ---
+if st.session_state.df is not None:
+    st.subheader("Interactive Blueprint Editor")
+    
+    updated_df = st.data_editor(
+        st.session_state.df,
+        column_config={
+            "Page Number": st.column_config.NumberColumn(disabled=True),
+            "Header Content": st.column_config.TextColumn("Header Content", width="large")
+        },
+        use_container_width=True,
+        hide_index=True
+    )
+
+    if st.button("Download as Word"):
+        doc = Document()
+        doc.add_heading(f"Coloring Book: {topic}", 0)
+        for _, row in updated_df.iterrows():
+            doc.add_paragraph(f"PAGE {row['Page Number']}")
+            doc.add_paragraph(row['Header Content'])
+            doc.add_page_break()
+        
+        bio = BytesIO()
+        doc.save(bio)
+        st.download_button("Click to Download", data=bio.getvalue(), file_name="book.docx")
