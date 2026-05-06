@@ -3,7 +3,7 @@ import pandas as pd
 from io import BytesIO
 from docx import Document
 
-# 1. UI Styling and Persistent Copy Button
+# 1. UI Styling: Background, Text Wrapping, and Persistent Copy Button
 st.markdown("""
     <style>
     [data-testid="stAppViewContainer"] {
@@ -18,15 +18,16 @@ st.markdown("""
         font-weight: bold;
         padding-bottom: 30px;
     }
-    /* Persistent Copy Button */
-    button[title="Copy to clipboard"] {
-        opacity: 1 !important;
-        visibility: visible !important;
-    }
-    /* Text Wrapping in Table */
+    /* Force text wrapping in Data Editor cells */
     [data-testid="stDataEditor"] div[role="gridcell"] > div {
         white-space: normal !important;
         word-break: break-word !important;
+        line-height: 1.4 !important;
+    }
+    /* Make the Copy to Clipboard button always visible */
+    button[title="Copy to clipboard"] {
+        opacity: 1 !important;
+        visibility: visible !important;
     }
     .stDataEditor {
         background-color: white;
@@ -36,42 +37,54 @@ st.markdown("""
     <div class="main-title">🎨 The LearnAi: Coloring Book Architect</div>
     """, unsafe_allow_html=True)
 
-# 2. Sidebar for API Validation (The "Signed In" Logic)
-with st.sidebar:
-    st.header("Settings")
-    api_key = st.text_input("Enter Google AI Studio API Key", type="password", 
-                             help="The 'Generate in AI Studio' button will only appear if this is provided.")
-    is_authenticated = len(api_key) > 10 # Basic check for key presence
-
 def get_unique_header(page_num, topic, age_group):
+    """Dynamic content generation logic."""
     is_junior = "6-9" in age_group
-    messages = [f"Explore {topic}!", f"The history of {topic} is grand.", f"Patterns in {topic}.", f"Future {topic}!", f"The story of {topic}."]
-    if not is_junior:
-        messages = [f"Happy {topic}!", f"Inside the lines of {topic}.", f"Your {topic} color.", f"Friend for {topic}.", f"Color the {topic}!"]
+    if is_junior:
+        messages = [
+            f"The science of {topic} is fascinating! Can you color the details accurately?",
+            f"History tells us {topic} changed our world. Use colors that feel historic.",
+            f"Did you know {topic} has a unique structure? Focus on the lines.",
+            f"Imagine {topic} in a futuristic city. Use neon and bright shades!",
+            f"Every {topic} has a story. Use art to tell what happens next."
+        ]
+    else:
+        messages = [
+            f"Look at this friendly {topic}! Use your favorite colors to fill it in.",
+            f"Stay inside the thick lines of the {topic}. Great job!",
+            f"What color makes a {topic} happy? You decide the best look!",
+            f"Color the {topic} first, then draw a smiley face next to it.",
+            f"How many {topic} shapes can you see? Color each one differently!"
+        ]
     return messages[page_num % len(messages)]
 
 # --- Input Section ---
 with st.container():
     r1_c1, r1_c2 = st.columns(2)
     with r1_c1:
-        topic = st.text_input("Book Topic", placeholder="e.g. Space Adventures")
+        topic = st.text_input("Book Topic", placeholder="e.g. Space Adventures", help="Main theme of the book.")
     with r1_c2:
-        page_count = st.number_input("Total Pages", min_value=1, value=1)
+        page_count = st.number_input("Total Pages", min_value=1, value=1, help="Number of pages to generate.")
     
     r2_c1, r2_c2 = st.columns(2)
     with r2_c1:
-        age_group = st.selectbox("Age Group", options=["3-5 years (Explorer)", "6-9 years (Junior Creator)"], index=None)
+        age_group = st.selectbox("Age Group", options=["3-5 years (Explorer)", "6-9 years (Junior Creator)"], 
+                                 index=None, placeholder="Please select an age group...",
+                                 help="Required: Determines the tone of instructions.")
     with r2_c2:
-        style_list = st.multiselect("Styles", ["Bold black line art", "Pure white background", "No shading", "High-contrast outlines"])
+        style_list = st.multiselect("Styles", 
+            ["Bold black line art", "Pure white background", "No shading", "High-contrast outlines", "Whimsical details"],
+            placeholder="Select artistic styles...", help="Select styles for the AI prompt.")
 
-    ref_image = st.file_uploader("Upload reference (Optional)", type=["png", "jpg", "jpeg"])
+    ref_image = st.file_uploader("Upload reference to review (Optional)", type=["png", "jpg", "jpeg"], 
+                                 help="Optional: Upload an image for style and placement review.")
 
 if 'df' not in st.session_state:
     st.session_state.df = None
 
 if st.button("Generate Blueprint"):
     if not topic or not style_list or age_group is None:
-        st.error("Please fill in all mandatory fields.")
+        st.error("Please fill in the Topic, select Styles, and choose an Age Group.")
     else:
         rows = []
         for i in range(1, page_count + 1):
@@ -82,40 +95,61 @@ if st.button("Generate Blueprint"):
             })
         st.session_state.df = pd.DataFrame(rows)
 
+# --- Display Section ---
 if st.session_state.df is not None:
-    updated_df = st.data_editor(st.session_state.df, use_container_width=True, hide_index=True)
-    st.markdown("---")
+    st.subheader("Interactive Blueprint Editor")
+    
+    updated_df = st.data_editor(
+        st.session_state.df,
+        column_config={
+            "Orientation": st.column_config.SelectboxColumn("Orientation", options=["Portrait", "Landscape"]),
+            "Page Number": st.column_config.NumberColumn(disabled=True),
+            "Header Content": st.column_config.TextColumn("Header Content (Editable)", width="large")
+        },
+        use_container_width=True,
+        hide_index=True
+    )
 
-    if st.radio("Generate visual prompts based on blueprint?", ["No", "Yes"], horizontal=True) == "Yes":
+    st.markdown("---")
+    gen_p = st.radio("Would you like to generate visual prompts based upon your book blue print?", ["No", "Yes"], horizontal=True)
+
+    if gen_p == "Yes":
+        all_prompts = []
         combined_styles = ", ".join(style_list)
-        ref_context = " (Match reference style)" if ref_image else ""
+        ref_context = " (Match the uploaded reference style and placement)" if ref_image else ""
         
         for _, row in updated_df.iterrows():
             prompt = (
                 f"Page {row['Page Number']}:\n"
-                f"Subject: {topic}. {row['Header Content']}\n"
-                f"Orientation: {row['Orientation']}\n"
-                f"Style: {combined_styles}{ref_context}"
+                f"Create a high-resolution, printable children's coloring page in {row['Orientation']} "
+                f"orientation (8.5 x 11 inches).\n\n"
+                f"Subject: {topic}. {row['Header Content']}\n\n"
+                f"Style: {combined_styles}{ref_context}\n\n"
+                f"Footer Branding: Designed by The LearnAi"
             )
+            all_prompts.append(prompt)
             
+            # Simplified Label: Page X
             st.markdown(f"### Page {row['Page Number']}")
+            # Persistent copy button via CSS above
             st.code(prompt, language="text")
-            
-            # --- IMAGE GENERATION OPTIONS ---
-            c1, c2 = st.columns(2)
-            
-            with c1:
-                # Conditional Logic: Only shows if API key is present
-                if is_authenticated:
-                    encoded_prompt = prompt.replace(" ", "%20")
-                    st.link_button("🎨 Generate in Google AI Studio", 
-                                   url=f"https://aistudio.google.com/app/prompts/new?prompt={encoded_prompt}")
-                else:
-                    st.caption("🔑 Link API Key in sidebar to enable AI Studio.")
-
-            with c2:
-                # Fixed Second Option: Clear interaction
-                if st.button(f"Generate via Nano Banana", key=f"gen_{row['Page Number']}"):
-                    st.warning("Please copy the prompt above and paste it into our chat to generate the image!")
-
             st.markdown("---")
+
+        # --- Export Section ---
+        st.markdown("### 📥 Export Section")
+        with st.popover("Export Visual Prompts as"):
+            xl_bio = BytesIO()
+            with pd.ExcelWriter(xl_bio, engine='openpyxl') as writer:
+                pd.DataFrame({"Visual Prompts": all_prompts}).to_excel(writer, index=False)
+            st.download_button("Excel (.xlsx)", data=xl_bio.getvalue(), file_name="blueprint.xlsx", use_container_width=True)
+            st.download_button("CSV (.csv)", data="\n\n".join(all_prompts), file_name="blueprint.csv", use_container_width=True)
+            st.download_button("Text (.txt)", data="\n\n".join(all_prompts), file_name="blueprint.txt", use_container_width=True)
+            
+            doc = Document()
+            doc.add_heading(f"Blueprint: {topic}", 0)
+            for p in all_prompts:
+                doc.add_paragraph(p)
+                doc.add_page_break()
+            word_bio = BytesIO()
+            doc.save(word_bio)
+            st.download_button("Word (.docx)", data=word_bio.getvalue(), file_name="blueprint.docx", use_container_width=True)
