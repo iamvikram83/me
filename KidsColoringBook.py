@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import google.generativeai as genai
 
 # --- 1. PAGE CONFIGURATION ---
 st.set_page_config(page_title="LearnAi Architect", layout="wide")
@@ -15,25 +14,19 @@ st.markdown("""
 
 # --- 2. SESSION STATE ---
 if 'step' not in st.session_state: st.session_state.step = 1
-if 'connected' not in st.session_state: st.session_state.connected = False
 
-# --- 3. STEPPER ---
-def render_stepper(current_step):
-    steps = ["1 · Setup", "2 · Blueprint", "3 · Done"]
-    cols = st.columns(3)
-    for i, (col, name) in enumerate(zip(cols, steps), 1):
-        if i == current_step: col.success(f"🔵 **{name}**")
-        elif i < current_step: col.success(f"✅ **{name}**")
-        else: col.info(f"⬜ {name}")
-
-# --- 4. MASTER PROMPT GENERATOR ---
-def generate_master_prompt(row, style_tags):
-    """Applies the specific Master Template logic provided by the user."""
-    orientation_str = "Portrait orientation (8.5 x 11 inches)" if row['Orientation'] == "Portrait" else "Landscape orientation (11 x 8.5 inches)"
-    
+# --- 3. MASTER PROMPT LOGIC ---
+def get_visual_prompt(row, style_tags):
+    """Generates prompt based on the Master Template."""
+    # Orientation logic
+    if row['Orientation'] == "Portrait":
+        dims = "Portrait orientation (8.5 x 11 inches)"
+    else:
+        dims = "Landscape orientation (11 x 8.5 inches)"
+        
     prompt = (
         f"The Content for Page {row['Page']}:\n\n"
-        f"Create a high-resolution, printable children's coloring page in {orientation_str}. "
+        f"Create a high-resolution, printable children's coloring page in {dims}. "
         f"Ensure high-quality line art and correct text placement for printing.\n\n"
         f"Subject: {row['Scene Description']}\n\n"
         f"Top Header: {row['Header']}\n\n"
@@ -43,92 +36,81 @@ def generate_master_prompt(row, style_tags):
     )
     return prompt
 
-# --- 5. APP HEADER ---
+# --- 4. APP HEADER ---
 st.markdown("<h1 style='text-align: center;'>🎨 The LearnAi: Coloring Book Architect</h1>", unsafe_allow_html=True)
-render_stepper(st.session_state.step)
+st.markdown("---")
 
-# --- 6. STEP 1: SETUP ---
+# --- 5. STEP 1: SETUP ---
 if st.session_state.step == 1:
-    with st.container():
-        c1, c2 = st.columns(2)
-        with c1:
-            topic = st.text_input("Book Topic", value=st.session_state.get('topic', ''), placeholder="e.g. Good Habits")
-            page_count = st.number_input("Total Pages", min_value=1, value=st.session_state.get('page_count', 5))
-        with c2:
-            age_group = st.selectbox("Age Group", options=["3-5 years", "6-9 years"])
-            # Style is blank/placeholder by default
-            style_list = st.multiselect("Selected Styles", 
-                                        options=["Bold black lines", "No shading", "White background", "High-contrast outlines"],
-                                        default=[],
-                                        placeholder="Please select styles...")
+    c1, c2 = st.columns(2)
+    with c1:
+        topic = st.text_input("Book Topic", placeholder="e.g. Good Habits")
+        page_count = st.number_input("Total Pages", min_value=1, value=5)
+    with c2:
+        age_group = st.selectbox("Age Group", options=["3-5 years", "6-9 years"])
+        style_list = st.multiselect("Styles", ["Bold black lines", "No shading", "White background"], default=["Bold black lines"])
 
-        if st.button("Next Step: Create Blueprint ➡️"):
-            if topic and style_list:
-                st.session_state.topic = topic
-                st.session_state.style_tags = ", ".join(style_list)
-                st.session_state.page_count = page_count
-                st.session_state.age_group = age_group
-                
-                # Initialize with unique headers and scene descriptions
-                data = []
-                for i in range(page_count):
-                    data.append({
-                        "Page": i + 1,
-                        "Header": f"Did you know about {topic}? Instruction: Color the scene using bright tones.",
-                        "Orientation": "Portrait",
-                        "Scene Description": f"Clean line art of {topic} related scene.",
-                        "Full Prompt": ""
-                    })
-                st.session_state.df = pd.DataFrame(data)
-                st.session_state.step = 2
-                st.rerun()
-            else:
-                st.warning("Please provide a Topic and select at least one Style.")
+    if st.button("Generate Visual Prompts ➡️"):
+        if topic and style_list:
+            st.session_state.topic = topic
+            st.session_state.style_tags = ", ".join(style_list)
+            
+            # Initialize hidden data
+            data = []
+            for i in range(page_count):
+                data.append({
+                    "Page": i + 1,
+                    "Header": f"Did you know about {topic}? Use bright colors for the smiles!",
+                    "Orientation": "Portrait",
+                    "Scene Description": f"Clean line art of {topic} related scene."
+                })
+            st.session_state.df = pd.DataFrame(data)
+            st.session_state.step = 2
+            st.rerun()
 
-# --- 7. STEP 2: BLUEPRINT ---
+# --- 6. STEP 2: VISUAL PROMPTS (NO TABLE DISPLAYED) ---
 elif st.session_state.step == 2:
-    if st.button("⬅️ Back"):
+    if st.button("⬅️ Back to Setup"):
         st.session_state.step = 1
         st.rerun()
 
-    st.subheader("Edit Page Details & Orientation")
+    st.subheader("Visual Prompt Summary")
+    st.info(f"Topic: {st.session_state.topic} | Use the options below to adjust individual pages.")
 
-    # Table with horizontal scroll enabled via column_config widths
-    edited_df = st.data_editor(
-        st.session_state.df,
-        use_container_width=True,
-        hide_index=True,
-        column_config={
-            "Page": st.column_config.NumberColumn(width="small", disabled=True),
-            "Header": st.column_config.TextColumn("Header (Story/Fact)", width="large"),
-            "Orientation": st.column_config.SelectboxColumn("Orientation", options=["Portrait", "Landscape"], width="medium"),
-            "Scene Description": st.column_config.TextColumn("Scene Description", width="large"),
-            "Full Prompt": st.column_config.TextColumn("Final Prompt", width="large", disabled=True)
-        }
-    )
+    # Iterate through the rows to display expanders
+    for index, row in st.session_state.df.iterrows():
+        with st.expander(f"Page {row['Page']} - {row['Orientation']} Mode"):
+            
+            col_ui, col_code = st.columns([1, 3])
+            
+            with col_ui:
+                # Editable Orientation for this specific page
+                new_orientation = st.selectbox(
+                    f"Orientation (Page {row['Page']})",
+                    options=["Portrait", "Landscape"],
+                    index=0 if row['Orientation'] == "Portrait" else 1,
+                    key=f"orient_{index}"
+                )
+                
+                # Update logic if changed
+                if new_orientation != row['Orientation']:
+                    st.session_state.df.at[index, 'Orientation'] = new_orientation
+                    st.rerun()
 
-    # Sync prompts with the Master Template logic
-    for index, row in edited_df.iterrows():
-        edited_df.at[index, 'Full Prompt'] = generate_master_prompt(row, st.session_state.style_tags)
-    
-    st.session_state.df = edited_df
+                st.text_input(f"Edit Header (Page {row['Page']})", value=row['Header'], key=f"head_{index}")
+                # Update description if edited
+                new_desc = st.text_area(f"Edit Scene (Page {row['Page']})", value=row['Scene Description'], key=f"desc_{index}")
+                if new_desc != row['Scene Description']:
+                    st.session_state.df.at[index, 'Scene Description'] = new_desc
+                    st.rerun()
+
+            with col_code:
+                # Generate and display the final prompt based on current row state
+                final_prompt = get_visual_prompt(st.session_state.df.iloc[index], st.session_state.style_tags)
+                st.markdown(f"**Current Orientation:** {new_orientation}")
+                st.code(final_prompt, language="text")
 
     st.markdown("---")
-    st.subheader("Visual Prompt Summary")
-    for index, row in st.session_state.df.iterrows():
-        with st.expander(f"Page {row['Page']} - {row['Header'][:50]}..."):
-            st.code(row['Full Prompt'], language="text")
-
     if st.button("Finish Project ✅"):
-        st.session_state.step = 3
-        st.rerun()
-
-# --- 8. STEP 3: DONE ---
-elif st.session_state.step == 3:
-    st.balloons()
-    st.success("🎉 Project Blueprint Ready!")
-    st.dataframe(st.session_state.df[["Page", "Header", "Orientation", "Full Prompt"]], use_container_width=True)
-    st.download_button("📥 Download CSV", st.session_state.df.to_csv(index=False), "blueprint.csv")
-    if st.button("Restart"):
-        st.session_state.clear()
-        st.rerun()
+        st.balloons()
+        st.success("Project Finalized!")
