@@ -28,7 +28,6 @@ def render_stepper(current_step):
 
 # --- 4. DATA HELPER: LOAD MODELS ---
 def get_image_models(api_key):
-    """Fetches available image models dynamically once API is linked."""
     try:
         genai.configure(api_key=api_key)
         available_models = []
@@ -36,7 +35,6 @@ def get_image_models(api_key):
             if 'image' in m.description.lower() or 'generate_image' in m.supported_generation_methods:
                 tier = " (Free Tier)" if "flash" in m.name.lower() else " (Paid Tier)"
                 available_models.append(f"{m.display_name}{tier}")
-        
         if not available_models:
             return ["Imagen 3 (Paid Tier)", "Imagen 3 Fast (Free Tier)"]
         return available_models
@@ -60,13 +58,9 @@ if st.session_state.step == 1:
             style_list = st.multiselect("Selected Styles", ["Bold black lines", "No shading", "White background"], default=["Bold black lines"])
 
         st.markdown("---")
-        
-        # ASK USER IF THEY WANT TO GENERATE IMAGES
         st.subheader("Image Generation Preferences")
-        want_ai = st.radio("Would you like to generate images here using visual prompts?", 
-                           options=["No", "Yes"], horizontal=True)
+        want_ai = st.radio("Would you like to generate images here using visual prompts?", options=["No", "Yes"], horizontal=True)
 
-        # OPTIONAL SECTION: GOOGLE AI STUDIO
         if want_ai == "Yes":
             st.markdown("#### 🔗 Link Google AI Studio")
             if not st.session_state.connected:
@@ -76,23 +70,17 @@ if st.session_state.step == 1:
                         st.session_state.api_key = api_input
                         st.session_state.connected = True
                         st.rerun()
-                    else:
-                        st.error("Please provide an API Key to use AI features.")
             else:
                 st.success("✅ API Connected!")
                 model_options = get_image_models(st.session_state.api_key)
-                gen_model = st.selectbox("Select Image Generation Model", options=model_options)
-                st.session_state.gen_model = gen_model
-                
+                st.session_state.gen_model = st.selectbox("Select Image Generation Model", options=model_options)
                 if st.button("Disconnect API"):
                     st.session_state.connected = False
                     st.rerun()
         else:
             st.session_state.connected = False
-            st.session_state.gen_model = "None (Manual Mode)"
-            st.info("💡 You are in 'Blueprint Only' mode. No API key required.")
+            st.session_state.gen_model = "Manual Mode"
 
-        # PROGRESSION BUTTON
         if st.button("Next Step: Create Blueprint ➡️"):
             if topic:
                 st.session_state.topic = topic
@@ -101,7 +89,7 @@ if st.session_state.step == 1:
                 st.session_state.style_tags = ", ".join(style_list)
                 st.session_state.want_ai = want_ai
                 
-                # Hydrate Table
+                # RE-ESTABLISHING BLUEPRINT LOGIC
                 st.session_state.df = pd.DataFrame([
                     {"Page": i + 1, "Scene Description": f"Scene for {topic}", "Prompt": ""}
                     for i in range(page_count)
@@ -118,7 +106,15 @@ elif st.session_state.step == 2:
         st.rerun()
 
     st.subheader("Finalize your Page Content")
-    st.info(f"**Mode:** {'AI Enabled' if st.session_state.get('want_ai') == 'Yes' else 'Blueprint Only'} | **Topic:** {st.session_state.get('topic')}")
+    
+    # Logic to dynamically update Prompts based on Scene Descriptions
+    for index, row in st.session_state.df.iterrows():
+        scene = row['Scene Description']
+        st.session_state.df.at[index, 'Prompt'] = (
+            f"Coloring book page for {st.session_state.age_group} kids. "
+            f"Subject: {scene}. Style: {st.session_state.style_tags}. "
+            "Clean black and white line art."
+        )
 
     edited_df = st.data_editor(st.session_state.df, use_container_width=True, hide_index=True)
     st.session_state.df = edited_df
@@ -131,13 +127,8 @@ elif st.session_state.step == 2:
     st.subheader("Visual Prompt Summary")
     
     for index, row in st.session_state.df.iterrows():
-        full_prompt = (f"Coloring book page for {st.session_state.get('age_group')}. "
-                       f"Subject: {row['Scene Description']}. Style: {st.session_state.get('style_tags')}.")
-        st.session_state.df.at[index, 'Prompt'] = full_prompt
-        
         with st.expander(f"Page {row['Page']} Details"):
-            st.code(full_prompt, language="text")
-            # Only show generation button if AI was opted-in
+            st.code(row['Prompt'], language="text")
             if st.session_state.get('want_ai') == "Yes" and st.session_state.connected:
                 if st.button(f"Generate Image for Page {row['Page']}", key=f"btn_{index}"):
                     st.write(f"⏳ Calling {st.session_state.get('gen_model')}...")
