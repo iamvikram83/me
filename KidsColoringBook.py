@@ -13,12 +13,13 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 # --- 2. SESSION STATE ---
-if 'step' not in st.session_state: st.session_state.step = 1
+if 'step' not in st.session_state:
+    st.session_state.step = 1
 
 # --- 3. MASTER PROMPT LOGIC ---
 def get_visual_prompt(row, style_tags):
-    """Generates the prompt based on the Master Template provided."""
-    # Orientation Logic for dimensions
+    """Generates the prompt based on the Master Template logic."""
+    # Mapping Orientation to specific print dimensions
     if row['Orientation'] == "Portrait":
         dims = "Portrait orientation (8.5 x 11 inches)"
     else:
@@ -48,7 +49,6 @@ if st.session_state.step == 1:
         page_count = st.number_input("Total Pages", min_value=1, value=5)
     with c2:
         age_group = st.selectbox("Age Group", options=["3-5 years", "6-9 years"])
-        # Defaulting to empty/placeholder as requested
         style_list = st.multiselect("Selected Styles", 
                                     options=["Bold black lines", "No shading", "White background", "High-contrast outlines"],
                                     default=[],
@@ -59,7 +59,7 @@ if st.session_state.step == 1:
             st.session_state.topic = topic
             st.session_state.style_tags = ", ".join(style_list)
             
-            # Initialize unique hidden data
+            # Initialize unique data structure
             data = []
             for i in range(page_count):
                 data.append({
@@ -82,11 +82,11 @@ elif st.session_state.step == 2:
             st.session_state.step = 1
             st.rerun()
     with col_toggle:
-        # DYNAMIC VIEW OPTION
         show_table = st.checkbox("🔍 View/Edit Blueprint Table", value=False)
 
     if show_table:
         st.subheader("Blueprint Table")
+        # Direct editing in table syncs with prompts
         edited_df = st.data_editor(
             st.session_state.df, 
             use_container_width=True, 
@@ -100,14 +100,13 @@ elif st.session_state.step == 2:
     st.markdown("---")
     st.subheader("Visual Prompt Summary")
     
-    # Iterate through current state to display interactive prompt blocks
+    # Render individual page controls and prompts
     for index, row in st.session_state.df.iterrows():
         with st.expander(f"Page {row['Page']} - {row['Orientation']}"):
-            
             ui_col, prompt_col = st.columns([1, 2])
             
             with ui_col:
-                # Direct Orientation Toggle
+                # Orientation selector that triggers dynamic prompt update
                 new_orient = st.selectbox(
                     f"Change Orientation", 
                     options=["Portrait", "Landscape"],
@@ -118,14 +117,14 @@ elif st.session_state.step == 2:
                     st.session_state.df.at[index, 'Orientation'] = new_orient
                     st.rerun()
                 
-                # Direct Header Edit
+                # Editable header for unique page facts
                 new_head = st.text_area(f"Edit Header Content", value=row['Header'], key=f"head_{index}")
                 if new_head != row['Header']:
                     st.session_state.df.at[index, 'Header'] = new_head
                     st.rerun()
 
             with prompt_col:
-                # Generate specific prompt based on current row settings
+                # Calculate prompt using the Master Template logic
                 final_prompt = get_visual_prompt(st.session_state.df.iloc[index], st.session_state.style_tags)
                 st.code(final_prompt, language="text")
 
@@ -133,11 +132,3 @@ elif st.session_state.step == 2:
     st.download_button("📥 Download All Prompts (CSV)", 
                        st.session_state.df.to_csv(index=False).encode('utf-8'), 
                        "blueprint.csv", "text/csv")
-
-### **Implementation Instructions**
-1.  **Dynamic Visibility**: The table only appears if you check the **"View/Edit Blueprint Table"** checkbox. This keeps the screen clean while allowing for bulk edits.
-2.  **Interactive Copying**: Each expander now acts as your primary workspace. By changing the orientation inside the expander, the `st.rerun()` function ensures the code block immediately updates to reflect the new dimensions.
-3.  **Master Template Alignment**: I have manually mapped your "Portrait" vs "Landscape" dimension strings into the `get_visual_prompt` function to ensure the AI output is print-ready (8.5x11 vs 11x8.5).
-4.  **Professional State Handling**: The keys for each input (`opt_{index}`, `head_{index}`) are uniquely generated using the row index to prevent the "duplicity" or "widget key collision" errors seen in earlier versions.
-
-**Clarifying Question**: Since we have integrated the download button, would you like me to also add a "Bulk Generate" feature that uses the Gemini API to automatically create unique "Header" stories for every page based on your book topic?
