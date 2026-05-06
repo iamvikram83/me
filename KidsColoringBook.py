@@ -9,60 +9,40 @@ st.markdown("""
     <style>
     [data-testid="stAppViewContainer"] { background-color: #006994; }
     .stMarkdown, p, h1, h2, h3, span, label { color: white !important; }
-    
-    /* Stepper UI Design */
-    .stepper-wrapper { display: flex; justify-content: space-between; margin: 40px 0; position: relative; width: 100%; }
-    .stepper-item { position: relative; display: flex; flex-direction: column; align-items: center; flex: 1; }
-    .stepper-item::before { position: absolute; content: ""; border-bottom: 2px solid #ccc; width: 100%; top: 20px; left: -50%; z-index: 0; }
-    .stepper-item:first-child::before { content: none; }
-    .completed::before { border-bottom-color: #4caf50 !important; }
-    .step-counter { position: relative; z-index: 1; display: flex; justify-content: center; align-items: center; width: 40px; height: 40px; border-radius: 50%; background: #ccc; margin-bottom: 6px; color: black; font-weight: bold; }
-    .active .step-counter { background-color: #3f51b5; color: white; }
-    .completed .step-counter { background-color: #4caf50; color: white; }
-    .step-name { font-size: 14px; color: white; font-weight: 500; }
 
     /* Remove the visibility toggle (eye icon) from the API Key field */
-    button[aria-label="Show password"], 
-    button[aria-label="Hide password"] { 
-        display: none !important; 
+    button[aria-label="Show password"],
+    button[aria-label="Hide password"] {
+        display: none !important;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# --- 2. LOGIC & DATA HELPERS ---
-if 'step' not in st.session_state: st.session_state.step = 1
-if 'connected' not in st.session_state: st.session_state.connected = False
+# --- 2. SESSION STATE DEFAULTS ---
+if 'step' not in st.session_state:
+    st.session_state.step = 1
+if 'connected' not in st.session_state:
+    st.session_state.connected = False
 
+# --- 3. STEPPER (Native Streamlit — no HTML, no leakage) ---
 def render_stepper(current_step):
-    """Renders the step progress bar. Always returns None to prevent HTML leakage."""
-    steps = ["Setup & Connection", "Blueprint & Prompts", "Done"]
-    html_parts = []
-    html_parts.append('<div class="stepper-wrapper">')
-    for i, name in enumerate(steps, 1):
+    steps = ["1 · Setup & Connection", "2 · Blueprint & Prompts", "3 · Done"]
+    cols = st.columns(3)
+    for i, (col, name) in enumerate(zip(cols, steps), 1):
         if i == current_step:
-            status = "active"
+            col.success(f"🔵 **{name}**")
         elif i < current_step:
-            status = "completed"
+            col.success(f"✅ **{name}**")
         else:
-            status = ""
-        html_parts.append(f'''
-            <div class="stepper-item {status}">
-                <div class="step-counter">{i}</div>
-                <div class="step-name">{name}</div>
-            </div>
-        ''')
-    html_parts.append('</div>')
-    html = "".join(html_parts)
-    st.markdown(html, unsafe_allow_html=True)
-    return None  # Explicit None prevents Streamlit capturing any return value
+            col.info(f"⬜ {name}")
 
-# --- 3. APP HEADER ---
+# --- 4. APP HEADER ---
 st.markdown("<h1 style='text-align: center;'>🎨 The LearnAi: Coloring Book Architect</h1>", unsafe_allow_html=True)
 
-# Call the function directly — never assign to a variable
 render_stepper(st.session_state.step)
+st.markdown("---")
 
-# --- 4. STEP 1: SETUP & API ---
+# --- 5. STEP 1: SETUP & API ---
 if st.session_state.step == 1:
     with st.container():
         c1, c2 = st.columns(2)
@@ -76,14 +56,13 @@ if st.session_state.step == 1:
         st.markdown("---")
         st.subheader("Link Google AI Studio")
 
-        # 'type="password"' masks input, CSS hides the eye icon
         api_input = st.text_input("Enter API Key", type="password")
 
         if st.button("Connect"):
             if api_input:
                 st.session_state.api_key = api_input
                 st.session_state.connected = True
-                st.success("API Connected!")
+                st.success("✅ API Connected!")
             else:
                 st.error("Please enter your API Key.")
 
@@ -93,13 +72,16 @@ if st.session_state.step == 1:
                     st.session_state.topic = topic
                     st.session_state.age_group = age_group
                     st.session_state.style_list = style_list
-                    st.session_state.df = pd.DataFrame([{"Page": i + 1, "Scene Description": "", "Prompt": ""} for i in range(page_count)])
+                    st.session_state.df = pd.DataFrame([
+                        {"Page": i + 1, "Scene Description": "", "Prompt": ""}
+                        for i in range(page_count)
+                    ])
                     st.session_state.step = 2
                     st.rerun()
                 else:
-                    st.warning("Please fill in Book Topic and Age Group before continuing.")
+                    st.warning("⚠️ Please fill in Book Topic and Age Group before continuing.")
 
-# --- 5. STEP 2: BLUEPRINT & PROMPTS ---
+# --- 6. STEP 2: BLUEPRINT & PROMPTS ---
 elif st.session_state.step == 2:
     if st.button("⬅️ Back"):
         st.session_state.step = 1
@@ -120,7 +102,7 @@ elif st.session_state.step == 2:
         st.session_state.step = 3
         st.rerun()
 
-# --- 6. STEP 3: DONE ---
+# --- 7. STEP 3: DONE ---
 elif st.session_state.step == 3:
     st.balloons()
     st.success("🎉 Project Completed! Your coloring book blueprint is ready.")
