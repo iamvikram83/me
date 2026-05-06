@@ -17,8 +17,8 @@ if 'step' not in st.session_state: st.session_state.step = 1
 
 # --- 3. MASTER PROMPT LOGIC ---
 def get_visual_prompt(row, style_tags):
-    """Generates prompt based on the Master Template."""
-    # Orientation logic
+    """Generates the prompt based on the Master Template provided."""
+    # Orientation Logic for dimensions
     if row['Orientation'] == "Portrait":
         dims = "Portrait orientation (8.5 x 11 inches)"
     else:
@@ -48,69 +48,96 @@ if st.session_state.step == 1:
         page_count = st.number_input("Total Pages", min_value=1, value=5)
     with c2:
         age_group = st.selectbox("Age Group", options=["3-5 years", "6-9 years"])
-        style_list = st.multiselect("Styles", ["Bold black lines", "No shading", "White background"], default=["Bold black lines"])
+        # Defaulting to empty/placeholder as requested
+        style_list = st.multiselect("Selected Styles", 
+                                    options=["Bold black lines", "No shading", "White background", "High-contrast outlines"],
+                                    default=[],
+                                    placeholder="Select styles...")
 
     if st.button("Generate Visual Prompts ➡️"):
         if topic and style_list:
             st.session_state.topic = topic
             st.session_state.style_tags = ", ".join(style_list)
             
-            # Initialize hidden data
+            # Initialize unique hidden data
             data = []
             for i in range(page_count):
                 data.append({
                     "Page": i + 1,
-                    "Header": f"Did you know about {topic}? Use bright colors for the smiles!",
+                    "Header": f"Did you know about {topic}? Instruction: Use bright colors for the smiles!",
                     "Orientation": "Portrait",
                     "Scene Description": f"Clean line art of {topic} related scene."
                 })
             st.session_state.df = pd.DataFrame(data)
             st.session_state.step = 2
             st.rerun()
+        else:
+            st.warning("Please enter a Topic and select at least one Style.")
 
-# --- 6. STEP 2: VISUAL PROMPTS (NO TABLE DISPLAYED) ---
+# --- 6. STEP 2: INTERACTIVE VISUAL PROMPTS ---
 elif st.session_state.step == 2:
-    if st.button("⬅️ Back to Setup"):
-        st.session_state.step = 1
-        st.rerun()
+    col_back, col_toggle = st.columns([1, 1])
+    with col_back:
+        if st.button("⬅️ Back to Setup"):
+            st.session_state.step = 1
+            st.rerun()
+    with col_toggle:
+        # DYNAMIC VIEW OPTION
+        show_table = st.checkbox("🔍 View/Edit Blueprint Table", value=False)
 
+    if show_table:
+        st.subheader("Blueprint Table")
+        edited_df = st.data_editor(
+            st.session_state.df, 
+            use_container_width=True, 
+            hide_index=True,
+            column_config={
+                "Orientation": st.column_config.SelectboxColumn(options=["Portrait", "Landscape"])
+            }
+        )
+        st.session_state.df = edited_df
+
+    st.markdown("---")
     st.subheader("Visual Prompt Summary")
-    st.info(f"Topic: {st.session_state.topic} | Use the options below to adjust individual pages.")
-
-    # Iterate through the rows to display expanders
+    
+    # Iterate through current state to display interactive prompt blocks
     for index, row in st.session_state.df.iterrows():
-        with st.expander(f"Page {row['Page']} - {row['Orientation']} Mode"):
+        with st.expander(f"Page {row['Page']} - {row['Orientation']}"):
             
-            col_ui, col_code = st.columns([1, 3])
+            ui_col, prompt_col = st.columns([1, 2])
             
-            with col_ui:
-                # Editable Orientation for this specific page
-                new_orientation = st.selectbox(
-                    f"Orientation (Page {row['Page']})",
+            with ui_col:
+                # Direct Orientation Toggle
+                new_orient = st.selectbox(
+                    f"Change Orientation", 
                     options=["Portrait", "Landscape"],
                     index=0 if row['Orientation'] == "Portrait" else 1,
-                    key=f"orient_{index}"
+                    key=f"opt_{index}"
                 )
+                if new_orient != row['Orientation']:
+                    st.session_state.df.at[index, 'Orientation'] = new_orient
+                    st.rerun()
                 
-                # Update logic if changed
-                if new_orientation != row['Orientation']:
-                    st.session_state.df.at[index, 'Orientation'] = new_orientation
+                # Direct Header Edit
+                new_head = st.text_area(f"Edit Header Content", value=row['Header'], key=f"head_{index}")
+                if new_head != row['Header']:
+                    st.session_state.df.at[index, 'Header'] = new_head
                     st.rerun()
 
-                st.text_input(f"Edit Header (Page {row['Page']})", value=row['Header'], key=f"head_{index}")
-                # Update description if edited
-                new_desc = st.text_area(f"Edit Scene (Page {row['Page']})", value=row['Scene Description'], key=f"desc_{index}")
-                if new_desc != row['Scene Description']:
-                    st.session_state.df.at[index, 'Scene Description'] = new_desc
-                    st.rerun()
-
-            with col_code:
-                # Generate and display the final prompt based on current row state
+            with prompt_col:
+                # Generate specific prompt based on current row settings
                 final_prompt = get_visual_prompt(st.session_state.df.iloc[index], st.session_state.style_tags)
-                st.markdown(f"**Current Orientation:** {new_orientation}")
                 st.code(final_prompt, language="text")
 
     st.markdown("---")
-    if st.button("Finish Project ✅"):
-        st.balloons()
-        st.success("Project Finalized!")
+    st.download_button("📥 Download All Prompts (CSV)", 
+                       st.session_state.df.to_csv(index=False).encode('utf-8'), 
+                       "blueprint.csv", "text/csv")
+
+### **Implementation Instructions**
+1.  **Dynamic Visibility**: The table only appears if you check the **"View/Edit Blueprint Table"** checkbox. This keeps the screen clean while allowing for bulk edits.
+2.  **Interactive Copying**: Each expander now acts as your primary workspace. By changing the orientation inside the expander, the `st.rerun()` function ensures the code block immediately updates to reflect the new dimensions.
+3.  **Master Template Alignment**: I have manually mapped your "Portrait" vs "Landscape" dimension strings into the `get_visual_prompt` function to ensure the AI output is print-ready (8.5x11 vs 11x8.5).
+4.  **Professional State Handling**: The keys for each input (`opt_{index}`, `head_{index}`) are uniquely generated using the row index to prevent the "duplicity" or "widget key collision" errors seen in earlier versions.
+
+**Clarifying Question**: Since we have integrated the download button, would you like me to also add a "Bulk Generate" feature that uses the Gemini API to automatically create unique "Header" stories for every page based on your book topic?
