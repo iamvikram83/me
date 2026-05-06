@@ -1,7 +1,6 @@
-streamlit
-pandas
-python-docx
-openpyxl
-google-generativeai
 streamlit>=1.35.0
-anthropic>=0.30.0
+
+# Install ONE of the following depending on your chosen AI provider:
+anthropic>=0.30.0        # for Claude (Anthropic)
+openai>=1.30.0           # for ChatGPT (OpenAI)
+google-generativeai>=0.7 # for Gemini (Google AI Studio)
