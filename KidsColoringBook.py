@@ -5,13 +5,13 @@ import google.generativeai as genai
 # --- 1. PAGE CONFIGURATION & STYLING ---
 st.set_page_config(page_title="LearnAi Architect", layout="wide")
 
-# Custom CSS to hide the eye icon and style the app
+# This CSS block styles the app and hides the API eye icon
 st.markdown("""
     <style>
     [data-testid="stAppViewContainer"] { background-color: #006994; }
     .stMarkdown, p, h1, h2, h3, span, label { color: white !important; }
     
-    /* Stepper UI CSS */
+    /* Stepper UI Design */
     .stepper-wrapper { display: flex; justify-content: space-between; margin: 40px 0; position: relative; width: 100%; }
     .stepper-item { position: relative; display: flex; flex-direction: column; align-items: center; flex: 1; }
     .stepper-item::before { position: absolute; content: ""; border-bottom: 2px solid #ccc; width: 100%; top: 20px; left: -50%; z-index: 0; }
@@ -21,7 +21,7 @@ st.markdown("""
     .completed .step-counter { background-color: #4caf50; color: white; }
     .step-name { font-size: 14px; color: white; font-weight: 500; }
 
-    /* Targeted fix to remove the eye icon (visibility toggle) */
+    /* Remove the visibility toggle (eye icon) from the API Key field */
     button[aria-label="Show password"], 
     button[aria-label="Hide password"] { 
         display: none !important; 
@@ -34,7 +34,7 @@ if 'step' not in st.session_state: st.session_state.step = 1
 if 'connected' not in st.session_state: st.session_state.connected = False
 
 def render_stepper(current_step):
-    """Renders the HTML directly to the app to prevent code leakage."""
+    """Renders HTML directly. Returns nothing to prevent string leakage."""
     steps = ["Setup & Connection", "Blueprint & Prompts", "Done"]
     html = '<div class="stepper-wrapper">'
     for i, name in enumerate(steps, 1):
@@ -46,38 +46,38 @@ def render_stepper(current_step):
             </div>
         '''
     html += '</div>'
-    # Use st.markdown inside the function so it executes immediately
+    # By calling st.markdown here and returning None, we fix the bug in Screenshot 2026-05-06 at 11.30.32.png
     st.markdown(html, unsafe_allow_html=True)
 
 # --- 3. APP HEADER ---
 st.markdown("<h1 style='text-align: center;'>🎨 The LearnAi: Coloring Book Architect</h1>", unsafe_allow_html=True)
 
-# Execute the stepper. Note: we do NOT assign this to a variable.
+# Call the function directly. Do NOT assign it to a variable.
 render_stepper(st.session_state.step)
 
 # --- 4. STEP 1: SETUP & API ---
 if st.session_state.step == 1:
     with st.container():
-        col1, col2 = st.columns(2)
-        with col1:
+        c1, c2 = st.columns(2)
+        with c1:
             topic = st.text_input("Book Topic", placeholder="e.g. Manners and Kindness")
             page_count = st.number_input("Total Pages", min_value=1, value=1)
-        with col2:
+        with c2:
             age_group = st.selectbox("Age Group", options=["3-5 years", "6-9 years"], index=None)
-            style_list = st.multiselect("Selected Styles", ["Bold black line art", "Pure white background", "No shading"])
+            style_list = st.multiselect("Selected Styles", ["Bold black lines", "No shading", "White background"])
 
         st.markdown("---")
         st.subheader("Link Google AI Studio")
         
-        # type="password" masks the input; our CSS above hides the eye icon toggle
+        # 'type="password"' masks dots, CSS hides the eye icon
         api_input = st.text_input("Enter API Key", type="password")
         
         if st.button("Connect"):
             if api_input:
                 st.session_state.connected = True
-                st.success("API Key Linked Successfully!")
+                st.success("API Connected!")
             else:
-                st.error("Please provide a valid key.")
+                st.error("Please enter your API Key.")
 
         if st.session_state.connected:
             if st.button("Next Step: Create Blueprint ➡️"):
@@ -86,12 +86,10 @@ if st.session_state.step == 1:
                     st.session_state.df = pd.DataFrame([{"Page": i+1} for i in range(page_count)])
                     st.session_state.step = 2
                     st.rerun()
-                else:
-                    st.warning("Topic and Age Group are required.")
 
 # --- 5. STEP 2: BLUEPRINT & PROMPTS ---
 elif st.session_state.step == 2:
-    if st.button("⬅️ Back to Step 1"):
+    if st.button("⬅️ Back"):
         st.session_state.step = 1
         st.rerun()
 
