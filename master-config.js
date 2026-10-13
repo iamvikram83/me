@@ -3,9 +3,9 @@
 // ==========================================
 window.CV_MASTER_CONFIG = {
     // 1. Security & Interaction Controls
-    allowRightClick: false,      // false = Restricted (Default), true = Allowed
-    allowLeftClick: false,       // true = Normal clicks, false = Blocks selection/clicks
-    allowScreenshot: false,      // false = Blocks PrintScreen/shortcuts, true = Allowed
+    allowRightClick: true,      // false = Restricted (Default), true = Allowed
+    allowLeftClick: true,       // true = Normal clicks, false = Blocks selection/clicks
+    allowScreenshot: true,      // false = Blocks PrintScreen/shortcuts, true = Allowed
     
     // 2. Toolbar Icon Controls
     showDownloadIcon: true,     // true = Show PDF download icon, false = Hidden
