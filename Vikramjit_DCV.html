@@ -65,7 +65,6 @@
         fetch('avatar.html')
             .then(response => response.text())
             .then(html => {
-                // Automatically inject interactive tel and copy-email functionality into the header text
                 let modifiedHtml = html
                     .replace(/\(\+91\)\s*9781381213/g, '<a href="tel:+919781381213" style="color: inherit; text-decoration: underline;">(+91) 9781381213</a>')
                     .replace(/kuwar\.vikram@gmail\.com/g, '<a href="#" id="email-link" onclick="copyEmail(event, \'kuwar.vikram@gmail.com\')" style="color: inherit; text-decoration: underline;">kuwar.vikram@gmail.com</a><span id="copy-feedback" style="margin-left: 6px; font-size: 0.85em; color: #28a745; display: none; font-weight: bold;">(Copied!)</span>');
@@ -161,4 +160,54 @@
     <p class="meta">Mar 2024 – May 2025</p>
     <ul><li>Led Agile sprints for the Finance Module redesign using AI-assisted documentation workflows, achieving zero critical defects at go-live and improving scheduling accuracy by 40%.</li></ul>
     <h3>Student Information &amp; Management Platform</h3>
-    <p class
+    <p class="meta">Jul 2021 – Apr 2022</p>
+    <ul><li>Delivered a full-stack student management platform from requirements to UAT in 10 months, managing 120+ user stories and cross-functional dependencies with rigorous quality assurance.</li></ul>
+    </section>
+
+    <section>
+    <h2>CERTIFICATIONS &amp; EDUCATION</h2>
+    <ul>
+    <li><strong>Certifications:</strong> Jira Foundation Badge (Atlassian); Advanced Lean Six Sigma Yellow Belt (Sparen &amp; Gewinn); Lean Six Sigma Yellow &amp; White Belts.</li>
+    <li><span class="chk">[CONFIRM: add "PMP (in progress, exam date ___)" or "PRINCE2 Foundation (in progress)" only if you are actually pursuing it]</span></li>
+    <li><strong>Education:</strong> Bachelor of Computer Applications (BCA), Hindu College (2002–2005).</li>
+    </ul>
+    </section>
+
+</div>
+
+<!-- Scripts -->
+<script>
+function copyEmail(event, email) {
+    event.preventDefault();
+    navigator.clipboard.writeText(email).then(() => {
+        const feedback = document.getElementById('copy-feedback');
+        if (feedback) {
+            feedback.style.display = 'inline';
+            setTimeout(() => {
+                feedback.style.display = 'none';
+            }, 2000);
+        }
+    }).catch(err => {
+        console.error('Failed to copy email: ', err);
+    });
+}
+
+(function(){
+  var body = document.body, btn = document.getElementById('theme-toggle');
+  function apply(t){ body.setAttribute('data-theme', t); if(btn) btn.textContent = t === 'dark' ? 'Light theme' : 'Dark theme'; }
+  try{ var saved = localStorage.getItem('cv-theme'); if(saved) apply(saved); }catch(e){}
+  if(btn){
+      btn.addEventListener('click', function(){
+        var t = body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        apply(t);
+        try{ localStorage.setItem('cv-theme', t); }catch(e){}
+      });
+  }
+  var printBtn = document.getElementById('print-btn');
+  if(printBtn){
+      printBtn.addEventListener('click', function(){ window.print(); });
+  }
+})();
+</script>
+</body>
+</html>
